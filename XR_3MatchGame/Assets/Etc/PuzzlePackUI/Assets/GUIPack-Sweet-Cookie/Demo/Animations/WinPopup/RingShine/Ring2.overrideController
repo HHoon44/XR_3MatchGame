@@ -1,0 +1,14 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!221 &22100000
+AnimatorOverrideController:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: Ring2
+  m_Controller: {fileID: 9100000, guid: 3744614c3e40b442ca4a92bb774530f6, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: 009326e8e054b4a4e9322f048201683d, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 02208dca680094fb1b0980c3d4a3831a, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 2063b61a696fe4383a946b8344a63db5, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 2063b61a696fe4383a946b8344a63db5, type: 2}
