@@ -1,15 +1,18 @@
+using System.Collections.Generic;
 using System.Resources;
 using UnityEngine;
+using UnityEngine.UIElements;
 using XR_3MatchGame.Util;
 using XR_3MatchGame_Object;
 using XR_3MatchGame_Resource;
 using XR_3MatchGame_Util;
 
-namespace XR_3MatchGame_Manager
+namespace XR_3MatchGame_InGame
 {
     public class GameManager : Singleton<GameManager>
     {
         private Vector2Int boardSize = new Vector2Int(6, 6);
+        public List<Block> blocks { get; private set; } = new List<Block>();
 
         public RectInt Bounds
         {
@@ -47,7 +50,8 @@ namespace XR_3MatchGame_Manager
         private void StartSpawn()
         {
             var blockPool = ObjectPoolManager.Instance.GetPool<Block>(PoolType.Block);
-
+            var boardManager = ActionManager.Instance;
+            
             var bounds = Bounds;
 
             for (int i = bounds.xMin; i <= bounds.xMax; i++)
@@ -56,6 +60,12 @@ namespace XR_3MatchGame_Manager
                 {
                     var block = blockPool.GetPoolableObject(obj => obj.CanRecycle);
                     block.transform.position = new Vector3(i, j, 0);
+
+                    block.Initialize(i, j);
+
+                    // 블럭 저장
+                    blocks.Add(block);
+
                     block.gameObject.SetActive(true);
                 }
             }

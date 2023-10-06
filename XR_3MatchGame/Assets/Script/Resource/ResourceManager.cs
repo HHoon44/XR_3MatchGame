@@ -22,7 +22,12 @@ namespace XR_3MatchGame_Resource
 
         private void LoadAddPrefabs()
         {
-            LoadPoolableObject<Block>(PoolType.Block, "Prefabs/Object/Block", 100);
+            LoadPoolableObject<Block>(PoolType.Block, "Prefabs/Object/Block0", 15);
+            LoadPoolableObject<Block>(PoolType.Block, "Prefabs/Object/Block1", 15);
+            LoadPoolableObject<Block>(PoolType.Block, "Prefabs/Object/Block2", 15);
+            LoadPoolableObject<Block>(PoolType.Block, "Prefabs/Object/Block3", 15);
+            LoadPoolableObject<Block>(PoolType.Block, "Prefabs/Object/Block4", 15);
+            LoadPoolableObject<Block>(PoolType.Block, "Prefabs/Object/Block5", 15);
         }
 
         public void LoadPoolableObject<T>(PoolType type, string path, int poolCount = 1, Action loadComplete = null)
