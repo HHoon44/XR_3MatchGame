@@ -1,10 +1,15 @@
+using System.Resources;
 using UnityEngine;
+using XR_3MatchGame.Util;
+using XR_3MatchGame_Object;
+using XR_3MatchGame_Resource;
+using XR_3MatchGame_Util;
 
 namespace XR_3MatchGame_Manager
 {
-    public class GameManager : MonoBehaviour
+    public class GameManager : Singleton<GameManager>
     {
-        public Vector2Int boardSize = new Vector2Int(6, 6);
+        private Vector2Int boardSize = new Vector2Int(6, 6);
 
         public RectInt Bounds
         {
@@ -16,8 +21,22 @@ namespace XR_3MatchGame_Manager
             }
         }
 
+        protected override void Awake()
+        {
+            base.Awake();
+
+            if (gameObject == null)
+            {
+                return;
+            }
+
+            DontDestroyOnLoad(this);
+        }
+
         private void Start()
         {
+            XR_3MatchGame_Resource.ResourceManager.Instance.Initialize();
+
             StartSpawn();
         }
 
@@ -27,13 +46,17 @@ namespace XR_3MatchGame_Manager
         /// </summary>
         private void StartSpawn()
         {
+            var blockPool = ObjectPoolManager.Instance.GetPool<Block>(PoolType.Block);
+
             var bounds = Bounds;
 
             for (int i = bounds.xMin; i <= bounds.xMax; i++)
             {
                 for (int j = bounds.yMin; j <= bounds.yMax; j++)
                 {
-                    // 오브젝트 생성
+                    var block = blockPool.GetPoolableObject(obj => obj.CanRecycle);
+                    block.transform.position = new Vector3(i, j, 0);
+                    block.gameObject.SetActive(true);
                 }
             }
         }

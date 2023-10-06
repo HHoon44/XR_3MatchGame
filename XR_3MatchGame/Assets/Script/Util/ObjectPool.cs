@@ -50,10 +50,10 @@ namespace XR_3MatchGame_Util
 
                     RegistPoolableObject(newObj.GetComponent<T>());
                 }
-            }
-            else
-            {
-                return null;
+                else
+                {
+                    return null;
+                }
             }
 
             T recycleObj = (pred == null) ? (Pool.Count > 0 ? Pool[0] : null) :

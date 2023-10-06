@@ -1,5 +1,6 @@
 using System.Net.NetworkInformation;
 using System.Net.Security;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public abstract class Singleton<T> : MonoBehaviour where T : Singleton<T>
