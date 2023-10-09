@@ -1,7 +1,5 @@
 using System.Collections.Generic;
-using System.Resources;
 using UnityEngine;
-using UnityEngine.UIElements;
 using XR_3MatchGame.Util;
 using XR_3MatchGame_Object;
 using XR_3MatchGame_Resource;
@@ -50,7 +48,6 @@ namespace XR_3MatchGame_InGame
         private void StartSpawn()
         {
             var blockPool = ObjectPoolManager.Instance.GetPool<Block>(PoolType.Block);
-            var boardManager = ActionManager.Instance;
             
             var bounds = Bounds;
 
@@ -61,6 +58,7 @@ namespace XR_3MatchGame_InGame
                     var block = blockPool.GetPoolableObject(obj => obj.CanRecycle);
                     block.transform.position = new Vector3(i, j, 0);
 
+                    // (-3, -3)
                     block.Initialize(i, j);
 
                     // 블럭 저장
