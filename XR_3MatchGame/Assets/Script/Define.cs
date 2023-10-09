@@ -10,4 +10,10 @@ namespace XR_3MatchGame.Util
         None, Block
     }
 
+    public enum AtlasType
+    { 
+        None,
+        Block
+    }
+
 }

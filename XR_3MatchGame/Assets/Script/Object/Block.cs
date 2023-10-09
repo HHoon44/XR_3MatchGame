@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using XR_3MatchGame_InGame;
 using XR_3MatchGame_Util;
@@ -90,8 +91,6 @@ namespace XR_3MatchGame_Object
             swipeAngle = Mathf.Atan2(finalTouchPosition.y - firstTouchPosition.y,
                 finalTouchPosition.x - firstTouchPosition.x) * 180 / Mathf.PI;
 
-            Debug.Log(swipeAngle);
-
             MoveBlock();
         }
 
@@ -133,6 +132,7 @@ namespace XR_3MatchGame_Object
                         otherBlock = gm.blocks[i];
                         otherBlock.col += 1;
                         col -= 1;
+
                         return;
                     }
                 }
@@ -173,6 +173,14 @@ namespace XR_3MatchGame_Object
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// 자신과 같은 블럭이 있는지 확인하는 메서드
+        /// </summary>
+        private void FindBlock()
+        {
+            Debug.Log("블럭 찾기 메서드 입니다.");
         }
     }
 }
