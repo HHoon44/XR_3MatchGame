@@ -71,13 +71,13 @@ namespace XR_3MatchGame_Object
 
         private void OnMouseDown()
         {
-            // 마우스 클릭을 시작 했을 때 위치를 저장
+            // 마우스 클릭을 시작 했을 때 위치를 저장한다
             firstTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         }
 
         private void OnMouseUp()
         {
-            // 마우스 클릭을 끝냈을 때 위치를 저장
+            // 마우스 클릭을 끝냈을 때 위치를 저장한다
             finalTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             CalculateAngle();
         }
@@ -87,7 +87,7 @@ namespace XR_3MatchGame_Object
         /// </summary>
         private void CalculateAngle()
         {
-            // 마우스 드래그 각도를 계산
+            // 마우스 드래그 각도를 계산한다
             swipeAngle = Mathf.Atan2(finalTouchPosition.y - firstTouchPosition.y,
                 finalTouchPosition.x - firstTouchPosition.x) * 180 / Mathf.PI;
 
