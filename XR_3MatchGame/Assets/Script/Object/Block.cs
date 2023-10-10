@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Net.NetworkInformation;
 using UnityEditor.TextCore.Text;
 using UnityEngine;
 using XR_3MatchGame.Util;
@@ -15,8 +16,8 @@ namespace XR_3MatchGame_Object
         public int col;
         public int row;
 
-        public int nextCol;     // 상대 블럭의 X 값
-        public int nextRow;     // 상대 블럭의 Y 값
+        public int targetCol;     // 상대 블럭의 X 값
+        public int targetRow;     // 상대 블럭의 Y 값
 
         public BlockType blockType = BlockType.None;
 
@@ -30,14 +31,12 @@ namespace XR_3MatchGame_Object
 
         private SpriteRenderer spriteRenderer;
 
-        [SerializeField]
         private Block otherBlock;
 
-        [SerializeField]
-        private Block leftBlock;
-
-        [SerializeField]
-        private Block rightBlock;
+        private Block leftBlock;    // 현재 블럭의 왼쪽에 존재하는 블럭
+        private Block rightBlock;   // 현재 블럭의 오른쪽에 존재하는 블럭
+        private Block topBlock;     // 현재 블럭의 위에 존재하는 블럭
+        private Block bottomBlock;  // 현재 블럭의 아래에 존재하는 블럭
 
         private GameManager gm;
 
@@ -50,8 +49,11 @@ namespace XR_3MatchGame_Object
         {
             spriteRenderer = GetComponent<SpriteRenderer>();
 
+            gm = GameManager.Instance;
+
             var blockNum = Random.Range(1, 7);
 
+            // 랜덤으로 블럭의 스프라이트를 설정합니다
             switch (blockNum)
             {
                 case (int)BlockType.Blue:
@@ -88,43 +90,17 @@ namespace XR_3MatchGame_Object
             this.col = col;
             this.row = row;
 
-            gm = GameManager.Instance;
-
-            nextCol = col;
-            nextRow = row;
+            targetCol = col;
+            targetRow = row;
         }
 
         private void Update()
         {
-            nextCol = col;
-            nextRow = row;
+            targetCol = col;
+            targetRow = row;
 
-            #region 블럭 스와이프
-            if (Mathf.Abs(nextCol - transform.position.x) > .1f)
-            {
-                tempPosition = new Vector2(nextCol, transform.position.y);
-                transform.position = Vector2.Lerp(transform.position, tempPosition, .05f);
-            }
-            else
-            {
-                tempPosition = new Vector2(nextCol, transform.position.y);
-                transform.position = tempPosition;
-            }
-
-            if (Mathf.Abs(nextRow - transform.position.y) > .1f)
-            {
-                tempPosition = new Vector2(transform.position.x, nextRow);
-                transform.position = Vector2.Lerp(transform.position, tempPosition, .05f);
-            }
-            else
-            {
-                tempPosition = new Vector2(transform.position.x, nextRow);
-                transform.position = tempPosition;
-            }
-            #endregion
-
-            // 같은 블럭을 찾습니다
-            //FindBlock();
+            // 블럭 스와이프를 체크 합니다
+            BlockSwipe();
         }
 
         private void OnMouseDown()
@@ -153,6 +129,34 @@ namespace XR_3MatchGame_Object
         }
 
         /// <summary>
+        /// 블럭을 스와이프를 체크하는 메서드
+        /// </summary>
+        private void BlockSwipe()
+        {
+            if (Mathf.Abs(targetCol - transform.position.x) > .1f)
+            {
+                tempPosition = new Vector2(targetCol, transform.position.y);
+                transform.position = Vector2.Lerp(transform.position, tempPosition, .05f);
+            }
+            else
+            {
+                tempPosition = new Vector2(targetCol, transform.position.y);
+                transform.position = tempPosition;
+            }
+
+            if (Mathf.Abs(targetRow - transform.position.y) > .1f)
+            {
+                tempPosition = new Vector2(transform.position.x, targetRow);
+                transform.position = Vector2.Lerp(transform.position, tempPosition, .05f);
+            }
+            else
+            {
+                tempPosition = new Vector2(transform.position.x, targetRow);
+                transform.position = tempPosition;
+            }
+        }
+
+        /// <summary>
         /// 계산한 각도를 이용해서 블럭을 이동시키는 메서드
         /// </summary>
         private void MoveBlock()
@@ -172,7 +176,6 @@ namespace XR_3MatchGame_Object
                         otherBlock.col -= 1;
                         col += 1;
 
-                        gm.isMove = true;
                         FindBlock();
                         return;
                     }
@@ -193,7 +196,6 @@ namespace XR_3MatchGame_Object
                         otherBlock.col += 1;
                         col -= 1;
 
-                        gm.isMove = true;
                         FindBlock();
                         return;
                     }
@@ -214,7 +216,6 @@ namespace XR_3MatchGame_Object
                         otherBlock.row -= 1;
                         row += 1;
 
-                        gm.isMove = true;
                         FindBlock();
                         return;
                     }
@@ -235,7 +236,6 @@ namespace XR_3MatchGame_Object
                         otherBlock.row += 1;
                         row -= 1;
 
-                        gm.isMove = true;
                         FindBlock();
                         return;
                     }
@@ -246,7 +246,7 @@ namespace XR_3MatchGame_Object
         /// <summary>
         /// 자신과 같은 블럭이 있는지 확인하는 메서드
         /// </summary>
-        private void FindBlock()
+        public void FindBlock()
         {
             Debug.Log("FindBlock");
 
@@ -285,12 +285,11 @@ namespace XR_3MatchGame_Object
                     }
                 }
 
-                yield return new WaitForSeconds(2f);
 
-                // 양쪽 다 현재 블럭과 같은 블럭이라면
-                // 비활성화
+                // 양쪽 다 현재 블럭과 같은 블럭이라면 비활성화
                 if (isLeft && isRight)
                 {
+                    yield return new WaitForSeconds(2f);
                     leftBlock.gameObject.SetActive(false);
                     rightBlock.gameObject.SetActive(false);
                     this.gameObject.SetActive(false);

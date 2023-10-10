@@ -13,8 +13,6 @@ namespace XR_3MatchGame_InGame
 
         public List<Block> blocks { get; private set; } = new List<Block>();
 
-        public bool isMove;     // 게임 내에서 블럭 이동 여부
-
         public RectInt Bounds
         {
             get
@@ -44,12 +42,19 @@ namespace XR_3MatchGame_InGame
             StartSpawn();
         }
 
-        private void Update()
+        public void CheckBlock()
         {
-            if (isMove)
+            // X, Y의 최소값 부터 쭉 돌기 위해서
+            // Bounds에 존재하는 최소값을 설정한다
+            var colValue = Bounds.xMin;
+            var rowValue = Bounds.yMin;
+
+            for (int i = 0; i < blocks.Count; i++)
             {
-                // 블럭 이동이 확인 되었다면
-                // 라인 체킹을 실행합니다.
+                if (colValue == blocks[i].col && rowValue == blocks[i].row)
+                {
+                    // 보류
+                }
             }
         }
 
