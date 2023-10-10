@@ -10,7 +10,10 @@ namespace XR_3MatchGame_InGame
     public class GameManager : Singleton<GameManager>
     {
         private Vector2Int boardSize = new Vector2Int(6, 6);
+
         public List<Block> blocks { get; private set; } = new List<Block>();
+
+        public bool isMove;     // 게임 내에서 블럭 이동 여부
 
         public RectInt Bounds
         {
@@ -41,6 +44,15 @@ namespace XR_3MatchGame_InGame
             StartSpawn();
         }
 
+        private void Update()
+        {
+            if (isMove)
+            {
+                // 블럭 이동이 확인 되었다면
+                // 라인 체킹을 실행합니다.
+            }
+        }
+
         /// <summary>
         /// 게임 시작 시
         /// 보드에 블럭을 세팅하는 메서드
@@ -48,7 +60,7 @@ namespace XR_3MatchGame_InGame
         private void StartSpawn()
         {
             var blockPool = ObjectPoolManager.Instance.GetPool<Block>(PoolType.Block);
-            
+
             var bounds = Bounds;
 
             for (int i = bounds.xMin; i <= bounds.xMax; i++)

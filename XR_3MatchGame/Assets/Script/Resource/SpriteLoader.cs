@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
-using UnityEditor.Sprites;
 using UnityEngine;
 using UnityEngine.U2D;
 using XR_3MatchGame.Util;
 
 namespace XR_3MatchGame_Resource
 {
-    public class SpriteLoader : MonoBehaviour
+    public static class SpriteLoader
     {
         /// <summary>
         /// 모든 아틀라스를 담아 놓을 저장소

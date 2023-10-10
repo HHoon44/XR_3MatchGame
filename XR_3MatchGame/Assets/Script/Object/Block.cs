@@ -1,6 +1,9 @@
 using System.Collections;
+using UnityEditor.TextCore.Text;
 using UnityEngine;
+using XR_3MatchGame.Util;
 using XR_3MatchGame_InGame;
+using XR_3MatchGame_Resource;
 using XR_3MatchGame_Util;
 
 namespace XR_3MatchGame_Object
@@ -15,13 +18,26 @@ namespace XR_3MatchGame_Object
         public int nextCol;     // 상대 블럭의 X 값
         public int nextRow;     // 상대 블럭의 Y 값
 
+        public BlockType blockType = BlockType.None;
+
         private float swipeAngle = 0;
         private Vector2 firstTouchPosition;
         private Vector2 finalTouchPosition;
         private Vector2 tempPosition;
 
+        private bool isRight;
+        private bool isLeft;
+
+        private SpriteRenderer spriteRenderer;
+
         [SerializeField]
         private Block otherBlock;
+
+        [SerializeField]
+        private Block leftBlock;
+
+        [SerializeField]
+        private Block rightBlock;
 
         private GameManager gm;
 
@@ -32,6 +48,43 @@ namespace XR_3MatchGame_Object
         /// <param name="row">Y 값</param>
         public void Initialize(int col, int row)
         {
+            spriteRenderer = GetComponent<SpriteRenderer>();
+
+            var blockNum = Random.Range(1, 7);
+
+            switch (blockNum)
+            {
+                case (int)BlockType.Blue:
+                    spriteRenderer.sprite = SpriteLoader.GetSprite(AtlasType.BlockAtlas, BlockType.Blue.ToString());
+                    blockType = BlockType.Blue;
+                    break;
+
+                case (int)BlockType.Cream:
+                    spriteRenderer.sprite = SpriteLoader.GetSprite(AtlasType.BlockAtlas, BlockType.Cream.ToString());
+                    blockType = BlockType.Cream;
+                    break;
+
+                case (int)BlockType.DarkBlue:
+                    spriteRenderer.sprite = SpriteLoader.GetSprite(AtlasType.BlockAtlas, BlockType.DarkBlue.ToString());
+                    blockType = BlockType.DarkBlue;
+                    break;
+
+                case (int)BlockType.Green:
+                    spriteRenderer.sprite = SpriteLoader.GetSprite(AtlasType.BlockAtlas, BlockType.Green.ToString());
+                    blockType = BlockType.Green;
+                    break;
+
+                case (int)BlockType.Pink:
+                    spriteRenderer.sprite = SpriteLoader.GetSprite(AtlasType.BlockAtlas, BlockType.Pink.ToString());
+                    blockType = BlockType.Pink;
+                    break;
+
+                case (int)BlockType.Purple:
+                    spriteRenderer.sprite = SpriteLoader.GetSprite(AtlasType.BlockAtlas, BlockType.Purple.ToString());
+                    blockType = BlockType.Purple;
+                    break;
+            }
+
             this.col = col;
             this.row = row;
 
@@ -46,6 +99,7 @@ namespace XR_3MatchGame_Object
             nextCol = col;
             nextRow = row;
 
+            #region 블럭 스와이프
             if (Mathf.Abs(nextCol - transform.position.x) > .1f)
             {
                 tempPosition = new Vector2(nextCol, transform.position.y);
@@ -67,6 +121,10 @@ namespace XR_3MatchGame_Object
                 tempPosition = new Vector2(transform.position.x, nextRow);
                 transform.position = tempPosition;
             }
+            #endregion
+
+            // 같은 블럭을 찾습니다
+            //FindBlock();
         }
 
         private void OnMouseDown()
@@ -99,7 +157,6 @@ namespace XR_3MatchGame_Object
         /// </summary>
         private void MoveBlock()
         {
-            /// 여기에 조건 달기
             if ((swipeAngle > -45 && swipeAngle <= 45) && col < gm.Bounds.xMax)
             {
                 // 오른쪽으로 스와이프
@@ -114,6 +171,9 @@ namespace XR_3MatchGame_Object
                         otherBlock = gm.blocks[i];
                         otherBlock.col -= 1;
                         col += 1;
+
+                        gm.isMove = true;
+                        FindBlock();
                         return;
                     }
                 }
@@ -133,6 +193,8 @@ namespace XR_3MatchGame_Object
                         otherBlock.col += 1;
                         col -= 1;
 
+                        gm.isMove = true;
+                        FindBlock();
                         return;
                     }
                 }
@@ -151,6 +213,9 @@ namespace XR_3MatchGame_Object
                         otherBlock = gm.blocks[i];
                         otherBlock.row -= 1;
                         row += 1;
+
+                        gm.isMove = true;
+                        FindBlock();
                         return;
                     }
                 }
@@ -169,6 +234,9 @@ namespace XR_3MatchGame_Object
                         otherBlock = gm.blocks[i];
                         otherBlock.row += 1;
                         row -= 1;
+
+                        gm.isMove = true;
+                        FindBlock();
                         return;
                     }
                 }
@@ -180,7 +248,54 @@ namespace XR_3MatchGame_Object
         /// </summary>
         private void FindBlock()
         {
-            Debug.Log("블럭 찾기 메서드 입니다.");
+            Debug.Log("FindBlock");
+
+            StartCoroutine(Test());
+
+            IEnumerator Test()
+            {
+                Debug.Log("Test");
+
+                // 좌, 우 같은 블럭이 있는지 확인합니다
+                for (int i = 0; i < gm.blocks.Count; i++)
+                {
+                    if (col + 1 == gm.blocks[i].col && row == gm.blocks[i].row)
+                    {
+                        // 왼쪽 블럭을 찾습니다
+                        leftBlock = gm.blocks[i];
+                    }
+
+                    if (col - 1 == gm.blocks[i].col && row == gm.blocks[i].row)
+                    {
+                        // 오른쪽 블럭을 찾습니다
+                        rightBlock = gm.blocks[i];
+                    }
+                }
+
+                if (leftBlock != null || rightBlock != null)
+                {
+                    if (leftBlock.blockType == this.blockType)
+                    {
+                        isLeft = true;
+                    }
+
+                    if (rightBlock.blockType == this.blockType)
+                    {
+                        isRight = true;
+                    }
+                }
+
+                yield return new WaitForSeconds(2f);
+
+                // 양쪽 다 현재 블럭과 같은 블럭이라면
+                // 비활성화
+                if (isLeft && isRight)
+                {
+                    leftBlock.gameObject.SetActive(false);
+                    rightBlock.gameObject.SetActive(false);
+                    this.gameObject.SetActive(false);
+                }
+            }
         }
     }
 }
