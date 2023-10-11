@@ -33,10 +33,8 @@ namespace XR_3MatchGame_Object
 
         private Block otherBlock;
 
-        private Block leftBlock;    // 현재 블럭의 왼쪽에 존재하는 블럭
-        private Block rightBlock;   // 현재 블럭의 오른쪽에 존재하는 블럭
-        private Block topBlock;     // 현재 블럭의 위에 존재하는 블럭
-        private Block bottomBlock;  // 현재 블럭의 아래에 존재하는 블럭
+        public Block leftBlock;    // 현재 블럭의 왼쪽에 존재하는 블럭
+        public Block rightBlock;   // 현재 블럭의 오른쪽에 존재하는 블럭
 
         private GameManager gm;
 
@@ -176,7 +174,7 @@ namespace XR_3MatchGame_Object
                         otherBlock.col -= 1;
                         col += 1;
 
-                        FindBlock();
+                        gm.CheckBlock();
                         return;
                     }
                 }
@@ -196,7 +194,7 @@ namespace XR_3MatchGame_Object
                         otherBlock.col += 1;
                         col -= 1;
 
-                        FindBlock();
+                        gm.CheckBlock();
                         return;
                     }
                 }
@@ -216,7 +214,7 @@ namespace XR_3MatchGame_Object
                         otherBlock.row -= 1;
                         row += 1;
 
-                        FindBlock();
+                        gm.CheckBlock();
                         return;
                     }
                 }
@@ -236,7 +234,7 @@ namespace XR_3MatchGame_Object
                         otherBlock.row += 1;
                         row -= 1;
 
-                        FindBlock();
+                        gm.CheckBlock();
                         return;
                     }
                 }
