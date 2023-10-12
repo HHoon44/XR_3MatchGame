@@ -52,18 +52,16 @@ namespace XR_3MatchGame_InGame
         {
             var blockPool = ObjectPoolManager.Instance.GetPool<Block>(PoolType.Block);
 
-            var bounds = Bounds;
-
-            for (int i = bounds.xMin; i <= bounds.xMax; i++)
+            for (int row = Bounds.yMin; row <= Bounds.yMax; row++)
             {
-                for (int j = bounds.yMin; j <= bounds.yMax; j++)
+                for (int col = Bounds.xMin; col <= Bounds.xMax; col++)
                 {
                     // 사용 가능한 블럭을 가져와서 세팅합니다
                     var block = blockPool.GetPoolableObject(obj => obj.CanRecycle);
-                    block.transform.position = new Vector3(i, j, 0);
+                    block.transform.position = new Vector3(col, row, 0);
 
                     // 현재 블럭이 생성될 위치 값을 전달 합니다
-                    block.Initialize(i, j);
+                    block.Initialize(col, row);
 
                     // 화면에 띄워진 블럭을 저장합니다
                     blocks.Add(block);
@@ -89,9 +87,6 @@ namespace XR_3MatchGame_InGame
             // 모든 블럭을 반복하면서 블럭의 좌,우를 체킹하도록 합니다
             for (int i = 0; i < blocks.Count; i++)
             {
-                /// 여기서 버그 터짐!! 아니 왜 i가 43이냐고
-                /// 뭔가 잘못된거 같다
-
                 // 맨 아래서부터 블럭 체킹을 시작합니다
                 if (blocks[i].col == colValue && blocks[i].row == rowValue)
                 {
@@ -119,32 +114,51 @@ namespace XR_3MatchGame_InGame
                     }
                 }
 
-
-            }
-
-            // 현재 블럭의 좌, 우를 체킹하는 메서드
-            IEnumerator LeftRightCheck(Block curBlock)
-            {
-                for (int i = 0; i < blocks.Count; i++)
+                // 현재 블럭의 좌, 우를 체킹하는 메서드
+                IEnumerator LeftRightCheck(Block curBlock)
                 {
-                    // curBlock의 왼쪽에 존재하는 블럭을 찾습니다
-                    if (curBlock.col - 1 == blocks[i].col &&
-                        curBlock.row == blocks[i].row)
+                    for (int i = 0; i < blocks.Count; i++)
                     {
-                        curBlock.leftBlock = blocks[i];
-                    }
+                        // curBlock의 왼쪽에 존재하는 블럭을 찾습니다
+                        if (curBlock.col - 1 == blocks[i].col &&
+                            curBlock.row == blocks[i].row)
+                        {
+                            curBlock.leftBlock = blocks[i];
+                        }
 
-                    // curBlock의 오른쪽에 존재하는 블럭을 찾습니다
-                    if (curBlock.col + 1 == blocks[i].col &&
-                        curBlock.row == blocks[i].row)
-                    {
-                        curBlock.rightBlock = blocks[i];
+                        // curBlock의 오른쪽에 존재하는 블럭을 찾습니다
+                        if (curBlock.col + 1 == blocks[i].col &&
+                            curBlock.row == blocks[i].row)
+                        {
+                            curBlock.rightBlock = blocks[i];
+                        }
+
+                        if (curBlock.rightBlock != null &&
+                            curBlock.leftBlock != null)
+                        {
+                            if (curBlock.blockType == curBlock.leftBlock.blockType &&
+                                curBlock.blockType == curBlock.rightBlock.blockType)
+                            {
+                                // 현재 블럭의 타입이 왼쪽과 오른쪽에 존재하는 타입과 같다면
+                                // 라인 클리어를 실행합니다.
+                                // Block의 풀을 가져와서 같은 블럭을 모두 풀에 반환 합니다
+                                var blockPool = ObjectPoolManager.Instance.GetPool<Block>(PoolType.Block);
+
+                                yield return new WaitForSeconds(2f);
+
+                                blockPool.ReturnPoolableObject(curBlock.rightBlock);
+                                blockPool.ReturnPoolableObject(curBlock.leftBlock);
+                                blockPool.ReturnPoolableObject(curBlock);
+                            }
+                        }
+                        else
+                        {
+                            yield return null;
+                        }
                     }
                 }
 
-                yield return null;
             }
-
         }
     }
 }
