@@ -37,6 +37,10 @@ namespace XR_3MatchGame_Object
         public Block leftBlock;    // 현재 블럭의 왼쪽에 존재하는 블럭
         public Block rightBlock;   // 현재 블럭의 오른쪽에 존재하는 블럭
 
+        // Test
+        public BlockType leftType = BlockType.None;
+        public BlockType rightType = BlockType.None;
+
         private GameManager gm;
 
         /// <summary>
@@ -50,7 +54,7 @@ namespace XR_3MatchGame_Object
 
             gm = GameManager.Instance;
 
-            var blockNum = Random.Range(1, 7);
+            var blockNum = Random.Range(1, gm.Bounds.x);
 
             // 랜덤으로 블럭의 스프라이트를 설정합니다
             switch (blockNum)
@@ -125,6 +129,7 @@ namespace XR_3MatchGame_Object
                 finalTouchPosition.x - firstTouchPosition.x) * 180 / Mathf.PI;
 
             MoveBlock();
+            gm.CheckBlock();
         }
 
         /// <summary>
@@ -160,7 +165,7 @@ namespace XR_3MatchGame_Object
         /// </summary>
         private void MoveBlock()
         {
-            if ((swipeAngle > -45 && swipeAngle <= 45) && col < gm.Bounds.xMax)
+            if ((swipeAngle > -45 && swipeAngle <= 45) && col < gm.Bounds.x)
             {
                 // 오른쪽으로 스와이프
                 for (int i = 0; i < gm.blocks.Count; i++)
@@ -174,13 +179,11 @@ namespace XR_3MatchGame_Object
                         otherBlock = gm.blocks[i];
                         otherBlock.col -= 1;
                         col += 1;
-
-                        gm.CheckBlock();
                         return;
                     }
                 }
             }
-            else if ((swipeAngle > 135 || swipeAngle <= -135) && col > gm.Bounds.xMin)
+            else if ((swipeAngle > 135 || swipeAngle <= -135) && col > 0)
             {
                 // 왼쪽으로 스와이프
                 for (int i = 0; i < gm.blocks.Count; i++)
@@ -194,13 +197,11 @@ namespace XR_3MatchGame_Object
                         otherBlock = gm.blocks[i];
                         otherBlock.col += 1;
                         col -= 1;
-
-                        gm.CheckBlock();
                         return;
                     }
                 }
             }
-            else if ((swipeAngle > 45 && swipeAngle <= 135) && row < gm.Bounds.yMax)
+            else if ((swipeAngle > 45 && swipeAngle <= 135) && row < gm.Bounds.y)
             {
                 // 위쪽으로 스와이프
                 for (int i = 0; i < gm.blocks.Count; i++)
@@ -214,13 +215,11 @@ namespace XR_3MatchGame_Object
                         otherBlock = gm.blocks[i];
                         otherBlock.row -= 1;
                         row += 1;
-
-                        gm.CheckBlock();
                         return;
                     }
                 }
             }
-            else if ((swipeAngle < -45 && swipeAngle >= -135) && row > gm.Bounds.yMin)
+            else if ((swipeAngle < -45 && swipeAngle >= -135) && row > 0)
             {
                 // 아래쪽으로 스와이프
                 for (int i = 0; i < gm.blocks.Count; i++)
@@ -230,68 +229,12 @@ namespace XR_3MatchGame_Object
                     {
                         // 목표 블럭을 찾아 col, row 값을 수정
                         // 아래쪽 이동이므로 목표 블럭은 row +1 이동
-                        // 아래쪽 이동이므로 이동 블럭은 row 
+                        // 아래쪽 이동이므로 이동 블럭은 row
                         otherBlock = gm.blocks[i];
                         otherBlock.row += 1;
                         row -= 1;
-
-                        gm.CheckBlock();
                         return;
                     }
-                }
-            }
-        }
-
-        /// <summary>
-        /// 자신과 같은 블럭이 있는지 확인하는 메서드
-        /// </summary>
-        public void FindBlock()
-        {
-            Debug.Log("FindBlock");
-
-            StartCoroutine(Test());
-
-            IEnumerator Test()
-            {
-                Debug.Log("Test");
-
-                // 좌, 우 같은 블럭이 있는지 확인합니다
-                for (int i = 0; i < gm.blocks.Count; i++)
-                {
-                    if (col + 1 == gm.blocks[i].col && row == gm.blocks[i].row)
-                    {
-                        // 왼쪽 블럭을 찾습니다
-                        leftBlock = gm.blocks[i];
-                    }
-
-                    if (col - 1 == gm.blocks[i].col && row == gm.blocks[i].row)
-                    {
-                        // 오른쪽 블럭을 찾습니다
-                        rightBlock = gm.blocks[i];
-                    }
-                }
-
-                if (leftBlock != null || rightBlock != null)
-                {
-                    if (leftBlock.blockType == this.blockType)
-                    {
-                        isLeft = true;
-                    }
-
-                    if (rightBlock.blockType == this.blockType)
-                    {
-                        isRight = true;
-                    }
-                }
-
-
-                // 양쪽 다 현재 블럭과 같은 블럭이라면 비활성화
-                if (isLeft && isRight)
-                {
-                    yield return new WaitForSeconds(2f);
-                    leftBlock.gameObject.SetActive(false);
-                    rightBlock.gameObject.SetActive(false);
-                    this.gameObject.SetActive(false);
                 }
             }
         }
