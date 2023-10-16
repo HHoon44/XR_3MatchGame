@@ -23,17 +23,18 @@ namespace XR_3MatchGame_Object
         private Vector2 finalTouchPosition;
         private Vector2 tempPosition;
 
-        private bool isRight;
-        private bool isLeft;
-
         private SpriteRenderer spriteRenderer;
 
         private Block otherBlock;
 
-        public Block leftBlock;    // 현재 블럭의 왼쪽에 존재하는 블럭
-        public Block rightBlock;   // 현재 블럭의 오른쪽에 존재하는 블럭
+        public Block topBlock;      // 현재 블럭의 위에 존재하는 블럭
+        public Block bottomBlock;   // 현재 블러의 아래에 존재하는 블럭
+        public Block leftBlock;     // 현재 블럭의 왼쪽에 존재하는 블럭
+        public Block rightBlock;    // 현재 블럭의 오른쪽에 존재하는 블럭
 
         // Test
+        public BlockType topType = BlockType.None;
+        public BlockType bottomType = BlockType.None;
         public BlockType leftType = BlockType.None;
         public BlockType rightType = BlockType.None;
 
@@ -50,7 +51,7 @@ namespace XR_3MatchGame_Object
 
             gm = GameManager.Instance;
 
-            var blockNum = Random.Range(1, gm.Bounds.x);
+            var blockNum = Random.Range(1, gm.BoardSize.x);
 
             // 랜덤으로 블럭의 스프라이트를 설정합니다
             switch (blockNum)
@@ -124,8 +125,8 @@ namespace XR_3MatchGame_Object
             swipeAngle = Mathf.Atan2(finalTouchPosition.y - firstTouchPosition.y,
                 finalTouchPosition.x - firstTouchPosition.x) * 180 / Mathf.PI;
 
-            MoveBlock();
-            gm.CheckBlock();
+            BlockMove();
+            gm.BlockCheck();
         }
 
         /// <summary>
@@ -159,9 +160,9 @@ namespace XR_3MatchGame_Object
         /// <summary>
         /// 계산한 각도를 이용해서 블럭을 이동시키는 메서드
         /// </summary>
-        private void MoveBlock()
+        private void BlockMove()
         {
-            if ((swipeAngle > -45 && swipeAngle <= 45) && col < gm.Bounds.x)
+            if ((swipeAngle > -45 && swipeAngle <= 45) && col < gm.BoardSize.x)
             {
                 // 오른쪽으로 스와이프
                 for (int i = 0; i < gm.blocks.Count; i++)
@@ -197,7 +198,7 @@ namespace XR_3MatchGame_Object
                     }
                 }
             }
-            else if ((swipeAngle > 45 && swipeAngle <= 135) && row < gm.Bounds.y)
+            else if ((swipeAngle > 45 && swipeAngle <= 135) && row < gm.BoardSize.y)
             {
                 // 위쪽으로 스와이프
                 for (int i = 0; i < gm.blocks.Count; i++)

@@ -43,7 +43,7 @@ namespace XR_3MatchGame_Resource
         /// </summary>
         private void LoadAllPrefabs()
         {
-            LoadPoolableObject<Block>(PoolType.Block, "Prefabs/Object/Block", 60);
+            LoadPoolableObject<Block>(PoolType.Block, "Prefabs/Object/Block", 80);
         }
 
         /// <summary>

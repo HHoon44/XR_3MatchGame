@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using UnityEngine;
 using XR_3MatchGame.Util;
@@ -10,18 +11,19 @@ namespace XR_3MatchGame_InGame
 {
     public class GameManager : Singleton<GameManager>
     {
-        //public List<Block> blocks { get; private set; } = new List<Block>();
-
         public List<Block> blocks = new List<Block>();
 
-        public Vector2Int Bounds
+        // Test
+        public List<Block> rowBlocks = new List<Block>();
+
+        public Vector2Int BoardSize
         {
             get
             {
                 // (0 ~ 7)
-                Vector2Int position = new Vector2Int(7, 7);
+                Vector2Int boardSize = new Vector2Int(7, 7);
 
-                return position;
+                return boardSize;
             }
         }
 
@@ -53,9 +55,9 @@ namespace XR_3MatchGame_InGame
             var blockPool = ObjectPoolManager.Instance.GetPool<Block>(PoolType.Block);
 
             // 화면에 블럭을 세팅 합니다
-            for (int row = 0; row < Bounds.y; row++)
+            for (int row = 0; row < BoardSize.y; row++)
             {
-                for (int col = 0; col < Bounds.x; col++)
+                for (int col = 0; col < BoardSize.x; col++)
                 {
                     // 풀에서 사용 가능한 블럭을 가져옵니다
                     var block = blockPool.GetPoolableObject(obj => obj.CanRecycle);
@@ -69,82 +71,137 @@ namespace XR_3MatchGame_InGame
                 }
             }
 
-            CheckBlock();
+            BlockCheck();
         }
 
         /// <summary>
-        /// 모든 블럭에 접근해서 체킹하는 메서드
+        /// 블럭의 왼 오를 확인하는 메서드
         /// </summary>
-        public void CheckBlock()
+        public void BlockCheck()
         {
-            Block curBlock = null;
-
-            StartCoroutine(LRCheck());
-
-            IEnumerator LRCheck()
+            // (0, 6) (7, 13) (14, 20) (21, 27) (28, 34) (35, 41) (42, 48)
+            // 모든 블럭의 왼 오 블럭을 체크합니다
+            for (int i = 0; i < blocks.Count; i++)
             {
-                // 모든 블럭의 왼쪽 오른쪽 블럭을 체크합니다
-                // (0, 6) (7, 13) (14, 20) (21, 27) (28, 34) (35, 41) (42, 48)
-                for (int i = 0; i < blocks.Count; i++)
+                for (int j = 0; j < blocks.Count; j++)
                 {
-                    curBlock = blocks[i];
-
-                    for (int j = 0; j < blocks.Count; j++)
+                    // 왼쪽
+                    if (blocks[i].col == 0)
                     {
-                        // 왼쪽
-                        if (curBlock.col - 1 == blocks[j].col && curBlock.row == blocks[j].row)
+                        // 왼쪽 맨 끝 블럭이라는 의미입니다
+                        blocks[i].leftBlock = null;
+                        blocks[i].leftType = BlockType.None;
+                    }
+                    else
+                    {
+                        if (blocks[i].col - 1 == blocks[j].col && blocks[i].row == blocks[j].row)
                         {
-                            curBlock.leftBlock = blocks[j];
+                            blocks[i].leftBlock = blocks[j];
 
                             // Test
-                            curBlock.leftType = blocks[j].blockType;
-                        }
-
-                        // 오른쪽
-                        if (curBlock.col + 1 == blocks[j].col && curBlock.row == blocks[j].row)
-                        {
-                            curBlock.rightBlock = blocks[j];
-
-                            // Test
-                            curBlock.rightType = blocks[j].blockType;
+                            blocks[i].leftType = blocks[j].blockType;
                         }
                     }
 
-                    /// 여기 작업 실행
-                    // 블럭 클리어 및 블럭 세팅
-                    if (curBlock.leftBlock != null && curBlock.rightBlock != null)
+                    // 오른쪽
+                    if (blocks[i].col == 6)
                     {
-                        // 왼쪽 오른쪽 블럭이 같다면 라인 클리어를 실행합니다
-                        if (curBlock.blockType == curBlock.leftBlock.blockType && curBlock.blockType == curBlock.rightBlock.blockType)
+                        // 오른쪽 맨 끝 블럭이라는 의미입니다
+                        blocks[i].rightBlock = null;
+                        blocks[i].rightType = BlockType.None;
+                    }
+                    else
+                    {
+                        if (blocks[i].col + 1 == blocks[j].col && blocks[i].row == blocks[j].row)
                         {
-                            Debug.Log("Check");
+                            blocks[i].rightBlock = blocks[j];
 
-                            var blockPool = ObjectPoolManager.Instance.GetPool<Block>(PoolType.Block);
-
-                            blockPool.ReturnPoolableObject(curBlock.leftBlock);
-                            blockPool.ReturnPoolableObject(curBlock.rightBlock);
-                            blockPool.ReturnPoolableObject(curBlock);
-
-                            blocks.Remove(curBlock.leftBlock);
-                            blocks.Remove(curBlock.rightBlock);
-                            blocks.Remove(curBlock);
-
-                            yield return new WaitForSeconds(1f);
-
-                            // 사라진 위치에 새로운 블럭을 배치합니다
-                            for (int newCol = curBlock.leftBlock.col; newCol <= curBlock.rightBlock.col; newCol++)
-                            {
-                                var newBlock = blockPool.GetPoolableObject(obj => obj.CanRecycle);
-                                newBlock.transform.position = new Vector3(newCol, curBlock.row, 0);
-                                newBlock.Initialize(newCol, curBlock.row);
-                                newBlock.gameObject.SetActive(true);
-
-                                blocks.Add(newBlock);
-                            }
+                            // Test
+                            blocks[i].rightType = blocks[j].blockType;
                         }
                     }
                 }
+            }
 
+            // 모든 블럭의 위 아래 블럭을 체크합니다
+            for (int i = 0; i < blocks.Count; i++)
+            {
+                for (int j = 0; j < blocks.Count; j++)
+                {
+                    // 위쪽
+                    if (blocks[i].row == 6)
+                    {
+                        blocks[i].topBlock = null;
+                        blocks[i].topType = BlockType.None;
+                    }
+                    else
+                    {
+                        if (blocks[i].col == blocks[j].col && blocks[i].row + 1 == blocks[j].row)
+                        {
+                            blocks[i].topBlock = blocks[j];
+
+                            // Test
+                            blocks[i].topType = blocks[j].blockType;
+                        }
+                    }
+
+                    // 아래쪽
+                    if (blocks[i].row == 0)
+                    {
+                        blocks[i].bottomBlock = null;
+                        blocks[i].bottomType = BlockType.None;
+                    }
+                    else
+                    {
+                        if (blocks[i].col == blocks[j].col && blocks[i].row - 1 == blocks[j].row)
+                        {
+                            blocks[i].bottomBlock = blocks[j];
+
+                            // Test
+                            blocks[i].bottomType = blocks[j].blockType;
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 라인 클리어를 담당하는 메서드
+        /// </summary>
+        /// <returns></returns>
+        IEnumerator LineClear()
+        {
+            var blockPool = ObjectPoolManager.Instance.GetPool<Block>(PoolType.Block);
+
+            for (int i = 0; i < blocks.Count; i++)
+            {
+                // 블럭 클리어 및 블럭 세팅
+                if (blocks[i].leftBlock != null && blocks[i].rightBlock != null)
+                {
+                    // 왼쪽 오른쪽으로 같은 블럭이 있는지 체크합니다
+                    if (blocks[i].blockType == blocks[i].leftBlock.blockType &&
+                        blocks[i].blockType == blocks[i].rightBlock.blockType)
+                    {
+                        yield return new WaitForSeconds(.5f);
+
+                        blockPool.ReturnPoolableObject(blocks[i].leftBlock);
+                        blockPool.ReturnPoolableObject(blocks[i].rightBlock);
+                        blockPool.ReturnPoolableObject(blocks[i]);
+
+                        yield return new WaitForSeconds(.5f);
+
+                        /// 같은 col에 존재하는 블럭들을 한칸씩 내려주는 코드 작성
+                        for (int d_Col = blocks[i].leftBlock.col; d_Col <= blocks[i].rightBlock.col; d_Col++)
+                        {
+
+                        }
+
+                        // 기존의 블럭을 리스트에서 제거합니다
+                        blocks.Remove(blocks[i].leftBlock);
+                        blocks.Remove(blocks[i].rightBlock);
+                        blocks.Remove(blocks[i]);
+                    }
+                }
             }
         }
     }
