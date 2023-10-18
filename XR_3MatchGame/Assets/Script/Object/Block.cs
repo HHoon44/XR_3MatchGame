@@ -127,9 +127,7 @@ namespace XR_3MatchGame_Object
 
             BlockMove();
             gm.LRTBCheck();
-
-            /// 여기서 하면 안되는건가?
-            StartCoroutine(gm.BlockClear());
+            gm.isCheck = true;
         }
 
         /// <summary>
