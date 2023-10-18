@@ -1,9 +1,2 @@
 정리
-- 일단 한칸 씩 내리는 작업을 진행 합시다.
-- 아래 코드 이용해서 움직임 구현하면 될거 같음.
-
-if (Mathf.Abs(targetRow - transform.position.y) > .1f)
-{
- tempPosition = new Vector2(transform.position.x, targetRow);
- transform.position = Vector2.Lerp(transform.position, tempPosition, .05f);
-}
+- 아니 왜 안되는겨

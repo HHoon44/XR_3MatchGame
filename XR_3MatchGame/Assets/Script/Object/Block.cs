@@ -126,7 +126,10 @@ namespace XR_3MatchGame_Object
                 finalTouchPosition.x - firstTouchPosition.x) * 180 / Mathf.PI;
 
             BlockMove();
-            gm.BlockCheck();
+            gm.LRTBCheck();
+
+            /// 여기서 하면 안되는건가?
+            StartCoroutine(gm.BlockClear());
         }
 
         /// <summary>
