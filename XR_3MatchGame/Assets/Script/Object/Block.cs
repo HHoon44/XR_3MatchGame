@@ -131,8 +131,7 @@ namespace XR_3MatchGame_Object
                 finalTouchPosition.x - firstTouchPosition.x) * 180 / Mathf.PI;
 
             BlockMove();
-            gm.LRTBCheck();
-            gm.startCheck = true;
+            gm.isStart = true;
         }
 
         /// <summary>
@@ -168,9 +167,9 @@ namespace XR_3MatchGame_Object
         /// </summary>
         private void BlockMove()
         {
+            // Right
             if ((swipeAngle > -45 && swipeAngle <= 45) && col < gm.BoardSize.x)
             {
-                // 오른쪽으로 스와이프
                 for (int i = 0; i < gm.blocks.Count; i++)
                 {
                     if (gm.blocks[i].col == col + 1 &&
@@ -182,13 +181,16 @@ namespace XR_3MatchGame_Object
                         otherBlock = gm.blocks[i];
                         otherBlock.col -= 1;
                         col += 1;
+
+                        gm.isStart = ReturnBlock(SwipeDir.Right);
+                        gm.LRTBCheck();
                         return;
                     }
                 }
             }
+            // Left
             else if ((swipeAngle > 135 || swipeAngle <= -135) && col > 0)
             {
-                // 왼쪽으로 스와이프
                 for (int i = 0; i < gm.blocks.Count; i++)
                 {
                     if (gm.blocks[i].col == col - 1 &&
@@ -200,13 +202,16 @@ namespace XR_3MatchGame_Object
                         otherBlock = gm.blocks[i];
                         otherBlock.col += 1;
                         col -= 1;
+
+                        gm.isStart = ReturnBlock(SwipeDir.Left);
+                        gm.LRTBCheck();
                         return;
                     }
                 }
             }
+            // Top
             else if ((swipeAngle > 45 && swipeAngle <= 135) && row < gm.BoardSize.y)
             {
-                // 위쪽으로 스와이프
                 for (int i = 0; i < gm.blocks.Count; i++)
                 {
                     if (gm.blocks[i].col == col &&
@@ -218,13 +223,16 @@ namespace XR_3MatchGame_Object
                         otherBlock = gm.blocks[i];
                         otherBlock.row -= 1;
                         row += 1;
+
+                        gm.isStart = ReturnBlock(SwipeDir.Top);
+                        gm.LRTBCheck();
                         return;
                     }
                 }
             }
+            // Bottom
             else if ((swipeAngle < -45 && swipeAngle >= -135) && row > 0)
             {
-                // 아래쪽으로 스와이프
                 for (int i = 0; i < gm.blocks.Count; i++)
                 {
                     if (gm.blocks[i].col == col &&
@@ -236,10 +244,53 @@ namespace XR_3MatchGame_Object
                         otherBlock = gm.blocks[i];
                         otherBlock.row += 1;
                         row -= 1;
+
+                        gm.isStart = ReturnBlock(SwipeDir.Bottom);
+                        gm.LRTBCheck();
                         return;
                     }
                 }
             }
+        }
+
+        private bool ReturnBlock(SwipeDir swipeDir)
+        {
+            /// 버그 투성이..
+            if (leftBlock != null && rightBlock != null)
+            {
+                if (blockType == leftBlock.blockType &&
+                    blockType == rightBlock.blockType)
+                {
+                    return true;
+                }
+                else
+                {
+                    switch (swipeDir)
+                    {
+                        case SwipeDir.Top:
+                            otherBlock.row += 1;
+                            row -= 1;
+                            break;
+
+                        case SwipeDir.Bottom:
+                            otherBlock.row -= 1;
+                            row += 1;
+                            break;
+
+                        case SwipeDir.Left:
+                            otherBlock.col -= 1;
+                            col += 1;
+                            break;
+
+                        case SwipeDir.Right:
+                            otherBlock.col += 1;
+                            col -= 1;
+                            break;
+                    }
+                }
+            }
+
+            return false;   
         }
     }
 }

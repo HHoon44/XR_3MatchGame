@@ -19,4 +19,9 @@ namespace XR_3MatchGame.Util
     {
         None, Blue, Cream, DarkBlue, Green, Pink, Purple
     }
+
+    public enum SwipeDir
+    { 
+        None, Top, Bottom, Left, Right
+    }
 }

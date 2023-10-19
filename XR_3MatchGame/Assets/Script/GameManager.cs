@@ -1,28 +1,20 @@
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using XR_3MatchGame.Util;
 using XR_3MatchGame_Object;
-using XR_3MatchGame_Resource;
 using XR_3MatchGame_Util;
 
 namespace XR_3MatchGame_InGame
 {
     public class GameManager : Singleton<GameManager>
     {
-        public List<Block> blocks = new List<Block>();
+        public List<Block> blocks = new List<Block>();          // 인 게임 내에서 모든 블럭을 담아놓을 리스트
+        public List<Block> rowBlocks = new List<Block>();       // 한칸 씩 내리는 블럭을 담아놓을 리스트
 
-        // Test
-        public List<Block> downBlcok = new List<Block>();
+        public bool isStart = false;        // 블럭 체크를 실행 할지에 대한 여부
 
-        // Test
-        public IEnumerator test_Coroutine;
-
-        public bool startCheck = false;
-
-        public bool isCheck = false;
+        public bool isCheck = false;        // 현재 블럭 체크가 실행 중인가에 대한 여부
 
         public Vector2Int BoardSize
         {
@@ -50,15 +42,14 @@ namespace XR_3MatchGame_InGame
         private void Start()
         {
             XR_3MatchGame_Resource.ResourceManager.Instance.Initialize();
-
             StartSpawn();
         }
 
         private void Update()
         {
-            if (startCheck == true)
+            if (isStart == true)
             {
-                startCheck = false;
+                isStart = false;
                 StartCoroutine(BlockClear());
             }
         }
@@ -188,21 +179,20 @@ namespace XR_3MatchGame_InGame
         /// <returns></returns>
         public IEnumerator BlockClear()
         {
+            // 블럭 체크를 시작합니다
             isCheck = true;
 
             var blockPool = ObjectPoolManager.Instance.GetPool<Block>(PoolType.Block);
 
+            var size = (BoardSize.x * BoardSize.y);
+
             // 현재 블럭
             Block curBlock = null;
 
-            var size = (BoardSize.x * BoardSize.y);
-
-            /*
-            // Left, Right 체크
             for (int i = 0; i < blocks.Count; i++)
             {
-                if (blocks[i].leftBlock != null &&
-                    blocks[i].rightBlock != null)
+                // Left, Right 체크를 시작합니다
+                if (blocks[i].leftBlock != null && blocks[i].rightBlock != null)
                 {
                     // i번째에 존재하는 블럭의 Left, Right를 체크합니다
                     if (blocks[i].blockType == blocks[i].leftBlock.blockType &&
@@ -210,7 +200,6 @@ namespace XR_3MatchGame_InGame
                     {
                         curBlock = blocks[i];
 
-                        // 딜레이 주고 라인 체크를 시작합니다
                         yield return new WaitForSeconds(.4f);
 
                         blockPool.ReturnPoolableObject(curBlock.rightBlock);
@@ -223,32 +212,31 @@ namespace XR_3MatchGame_InGame
                         var m_Col = curBlock.col;
                         var l_Col = curBlock.rightBlock.col;
 
-                        // 처음 Row 값을 담아놓습니다
-                        var t_Row = curBlock.row;
+                        // 베이스가될 Row값을 담아놓습니다
+                        var b_Row = curBlock.row;
 
-                        // 현재 블럭이 맨 위의 블럭인지 체크 합니다
+                        // 체크한 블럭이 맨 위 블럭인지 확인합니다
                         if (curBlock.row != (BoardSize.y - 1))
                         {
-                            /// 여기서 계속 오류 나는거 같음
-                            // 한칸 내릴 블럭들을 찾습니다
                             for (int j = 0; j < blocks.Count; j++)
                             {
+                                // 조건을 충족하는 모든 블럭을 찾습니다
                                 if ((blocks[j].col == f_Col || blocks[j].col == m_Col || blocks[j].col == l_Col) &&
-                                    blocks[j].row > t_Row)
+                                    blocks[j].row > b_Row)
                                 {
-                                    downBlcok.Add(blocks[j]);
+                                    rowBlocks.Add(blocks[j]);
                                 }
                             }
 
-                            for (int j = 0; j < downBlcok.Count; j++)
+                            // 찾은 블럭들을 내려줍니다
+                            for (int j = 0; j < rowBlocks.Count; j++)
                             {
-                                // 찾은 블럭들의 한칸씩 내려줍니다
-                                var targetRow = downBlcok[j].row -= 1;
+                                var targetRow = rowBlocks[j].row -= 1;
 
-                                if (Mathf.Abs(targetRow - downBlcok[j].transform.position.y) > .1f)
+                                if (Mathf.Abs(targetRow - rowBlocks[j].transform.position.y) > .1f)
                                 {
-                                    Vector2 tempPosition = new Vector2(downBlcok[j].transform.position.x, targetRow);
-                                    downBlcok[j].transform.position = Vector2.Lerp(downBlcok[j].transform.position, tempPosition, .05f);
+                                    Vector2 tempPosition = new Vector2(rowBlocks[j].transform.position.x, targetRow);
+                                    rowBlocks[j].transform.position = Vector2.Lerp(rowBlocks[j].transform.position, tempPosition, .05f);
                                 }
                             }
                         }
@@ -261,78 +249,48 @@ namespace XR_3MatchGame_InGame
                         // 비어있는 칸의 개수를 구합니다
                         var emptyBlockCount = size - (blocks.Count);
 
-                        // 비어있는 위치의 Col, Row 값을 저장 해놓습니다
-                        // ( Row에 +1을 해줘야 빈칸의 첫번째 Row 값을 알 수있음 )
-                        // c_Row로 설정되면 맨 위의 블럭이라는 뜻 입니다
+                        // 비어있는 칸에 새로운 블럭을 추가할 때 사용할 Col, Row 값을 담아놓습니다
+                        // Row 값은 조건 연산자를 이용해서 설정합니다
                         var n_Col = f_Col;
-                        var n_Row = downBlcok.Count > 0 ? downBlcok[downBlcok.Count - 1].row + 1 : t_Row;
+                        var n_Row = rowBlocks.Count > 0 ? rowBlocks[rowBlocks.Count - 1].row + 1 : b_Row;
 
                         yield return new WaitForSeconds(.4f);
 
-                        if (downBlcok.Count == 0)
+                        for (int j = 0; j < emptyBlockCount; j++)
                         {
-                            for (int j = 0; j < emptyBlockCount; j++)
+                            // EX
+                            // Col = 0 1 2
+                            // Row = 1부터 6까지
+                            if (n_Col <= l_Col && n_Row < BoardSize.y)
                             {
-                                // 한칸 내릴 블럭이 없다면
-                                // 바로 블럭을 생성 합니다
-                                if (n_Col <= l_Col && n_Row < BoardSize.y)
-                                {
-                                    var newBlock = blockPool.GetPoolableObject(obj => obj.CanRecycle);
-                                    newBlock.transform.position = new Vector3(n_Col, n_Row, 0);
-                                    newBlock.gameObject.SetActive(true);
-                                    newBlock.Initialize(n_Col, n_Row);
+                                var newBlock = blockPool.GetPoolableObject(obj => obj.CanRecycle);
+                                newBlock.transform.position = new Vector3(n_Col, n_Row, 0);
+                                newBlock.gameObject.SetActive(true);
+                                newBlock.Initialize(n_Col, n_Row);
 
-                                    blocks.Add(newBlock);
+                                blocks.Add(newBlock);
 
-                                    n_Col++;
-                                }
+                                n_Col++;
                             }
-                        }
-                        else
-                        {
-                            for (int j = 0; j < emptyBlockCount; j++)
+
+                            if (n_Col > l_Col)
                             {
-                                if (n_Col <= l_Col && n_Row < BoardSize.y)
-                                {
-                                    var newBlock = blockPool.GetPoolableObject(obj => obj.CanRecycle);
-                                    newBlock.transform.position = new Vector3(n_Col, n_Row, 0);
-                                    newBlock.gameObject.SetActive(true);
-                                    newBlock.Initialize(n_Col, n_Row);
+                                // 범위를 넘었다면 재조정 합니다
+                                n_Col = f_Col;
 
-                                    blocks.Add(newBlock);
-
-                                    n_Col++;
-                                }
-
-                                if (n_Col > l_Col)
-                                {
-                                    // ++ 과정에서 Col이 범위를 넘었을 경우 다시 초기화 해줍니다
-                                    n_Col = f_Col;
-
-                                    // 현재 Row에 블럭을 생성하였으므로 ++을 해줍니다
-                                    n_Row++;
-                                }
+                                // 다음 칸을 채우기 위해서 ++을 합니다
+                                n_Row++;
                             }
                         }
 
                         LRTBCheck();
-
-                        // 작업이 완료 되었다면 비워줍니다
-                        downBlcok.Clear();
-
-                        /// 이게 맞는거 같음
+                        rowBlocks.Clear();
                         i = 0;
                     }
                 }
 
-            }
-            */
-
-            // Top, Bottom 체크
-            for (int i = 0; i < blocks.Count; i++)
-            {
-                if (blocks[i].topBlock != null &&
-                    blocks[i].bottomBlock != null)
+                // Top, Bottom 체크를 시작합니다
+                if (blocks[i].topBlock != null && blocks[i].bottomBlock != null)
                 {
                     // i번째에 존재하는 블럭의 Top, Bottom을 체크합니다
                     if (blocks[i].blockType == blocks[i].topBlock.blockType &&
@@ -361,19 +319,19 @@ namespace XR_3MatchGame_InGame
                             {
                                 if (blocks[j].col == b_Col && blocks[j].row > b_Row)
                                 {
-                                    downBlcok.Add(blocks[j]);
+                                    rowBlocks.Add(blocks[j]);
                                 }
                             }
 
-                            for (int j = 0; j < downBlcok.Count; j++)
+                            for (int j = 0; j < rowBlocks.Count; j++)
                             {
                                 // 찾은 블럭들의 한칸씩 내려줍니다
-                                var targetRow = downBlcok[j].row -= 3;
+                                var targetRow = rowBlocks[j].row -= 3;
 
-                                if (Mathf.Abs(targetRow - downBlcok[j].transform.position.y) > .1f)
+                                if (Mathf.Abs(targetRow - rowBlocks[j].transform.position.y) > .1f)
                                 {
-                                    Vector2 tempPosition = new Vector2(downBlcok[j].transform.position.x, targetRow);
-                                    downBlcok[j].transform.position = Vector2.Lerp(downBlcok[j].transform.position, tempPosition, .05f);
+                                    Vector2 tempPosition = new Vector2(rowBlocks[j].transform.position.x, targetRow);
+                                    rowBlocks[j].transform.position = Vector2.Lerp(rowBlocks[j].transform.position, tempPosition, .05f);
                                 }
                             }
                         }
@@ -386,7 +344,8 @@ namespace XR_3MatchGame_InGame
                         // 비어있는 칸의 개수를 구합니다
                         var emptyBlockCount = size - (blocks.Count);
 
-                        var n_Row = downBlcok.Count > 0 ? downBlcok[downBlcok.Count - 1].row + 1 : b_Row;
+                        /// 여기가 문제다
+                        var n_Row = rowBlocks.Count > 0 ? rowBlocks[rowBlocks.Count - 1].row + 1 : b_Row - 2;
 
                         yield return new WaitForSeconds(.4f);
 
@@ -406,16 +365,13 @@ namespace XR_3MatchGame_InGame
                         }
 
                         LRTBCheck();
-
-                        // 작업이 완료 되었다면 비워줍니다
-                        downBlcok.Clear();
-
-                        /// 이게 맞는거 같음
+                        rowBlocks.Clear();
                         i = 0;
                     }
                 }
             }
 
+            // 블럭 체크를 종료합니다
             isCheck = false;
         }
     }
