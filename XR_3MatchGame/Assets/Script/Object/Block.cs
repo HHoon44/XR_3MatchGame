@@ -121,13 +121,18 @@ namespace XR_3MatchGame_Object
         /// </summary>
         private void CalculateAngle()
         {
+            if (gm.isCheck == true)
+            {
+                return;
+            }
+
             // 마우스 드래그 각도를 계산한다
             swipeAngle = Mathf.Atan2(finalTouchPosition.y - firstTouchPosition.y,
                 finalTouchPosition.x - firstTouchPosition.x) * 180 / Mathf.PI;
 
             BlockMove();
             gm.LRTBCheck();
-            gm.isCheck = true;
+            gm.startCheck = true;
         }
 
         /// <summary>
