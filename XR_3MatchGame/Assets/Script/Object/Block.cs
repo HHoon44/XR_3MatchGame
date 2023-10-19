@@ -131,7 +131,6 @@ namespace XR_3MatchGame_Object
                 finalTouchPosition.x - firstTouchPosition.x) * 180 / Mathf.PI;
 
             BlockMove();
-            gm.isStart = true;
         }
 
         /// <summary>
@@ -182,8 +181,8 @@ namespace XR_3MatchGame_Object
                         otherBlock.col -= 1;
                         col += 1;
 
-                        gm.isStart = ReturnBlock(SwipeDir.Right);
                         gm.LRTBCheck();
+                        gm.isStart = ReturnBlock(SwipeDir.Right);
                         return;
                     }
                 }
@@ -203,8 +202,8 @@ namespace XR_3MatchGame_Object
                         otherBlock.col += 1;
                         col -= 1;
 
-                        gm.isStart = ReturnBlock(SwipeDir.Left);
                         gm.LRTBCheck();
+                        gm.isStart = ReturnBlock(SwipeDir.Left);
                         return;
                     }
                 }
@@ -224,8 +223,8 @@ namespace XR_3MatchGame_Object
                         otherBlock.row -= 1;
                         row += 1;
 
-                        gm.isStart = ReturnBlock(SwipeDir.Top);
                         gm.LRTBCheck();
+                        gm.isStart = ReturnBlock(SwipeDir.Top);
                         return;
                     }
                 }
@@ -245,8 +244,8 @@ namespace XR_3MatchGame_Object
                         otherBlock.row += 1;
                         row -= 1;
 
-                        gm.isStart = ReturnBlock(SwipeDir.Bottom);
                         gm.LRTBCheck();
+                        gm.isStart = ReturnBlock(SwipeDir.Bottom);
                         return;
                     }
                 }
@@ -255,7 +254,10 @@ namespace XR_3MatchGame_Object
 
         private bool ReturnBlock(SwipeDir swipeDir)
         {
-            /// 버그 투성이..
+            /// Lerp 사용해서 이동 구현 해야할듯
+
+            Debug.Log("ReturnBlock");
+
             if (leftBlock != null && rightBlock != null)
             {
                 if (blockType == leftBlock.blockType &&
@@ -270,27 +272,37 @@ namespace XR_3MatchGame_Object
                         case SwipeDir.Top:
                             otherBlock.row += 1;
                             row -= 1;
+
+                            /// 여기서 블럭 이동하는 로직을 작성하면 될거같음
+                            if (Mathf.Abs(targetRow - transform.position.y) > .1f)
+                            {
+                                tempPosition = new Vector2(transform.position.x, targetRow);
+                                transform.position = Vector2.Lerp(transform.position, tempPosition, .05f);
+                            }
                             break;
 
                         case SwipeDir.Bottom:
                             otherBlock.row -= 1;
                             row += 1;
+
                             break;
 
                         case SwipeDir.Left:
                             otherBlock.col -= 1;
                             col += 1;
+
                             break;
 
                         case SwipeDir.Right:
                             otherBlock.col += 1;
                             col -= 1;
+
                             break;
                     }
                 }
             }
 
-            return false;   
+            return false;
         }
     }
 }
