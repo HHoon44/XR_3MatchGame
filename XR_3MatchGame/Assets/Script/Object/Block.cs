@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using XR_3MatchGame.Util;
 using XR_3MatchGame_InGame;
@@ -37,6 +38,8 @@ namespace XR_3MatchGame_Object
         public BlockType bottomType = BlockType.None;
         public BlockType leftType = BlockType.None;
         public BlockType rightType = BlockType.None;
+
+        private SwipeDir swipeDir = SwipeDir.None;
 
         private GameManager gm;
 
@@ -140,6 +143,8 @@ namespace XR_3MatchGame_Object
         {
             if (Mathf.Abs(targetCol - transform.position.x) > .1f)
             {
+                Debug.Log("BlockSwipe");
+
                 tempPosition = new Vector2(targetCol, transform.position.y);
                 transform.position = Vector2.Lerp(transform.position, tempPosition, .05f);
             }
@@ -166,65 +171,24 @@ namespace XR_3MatchGame_Object
         /// </summary>
         private void BlockMove()
         {
-            // Right
-            if ((swipeAngle > -45 && swipeAngle <= 45) && col < gm.BoardSize.x)
-            {
-                for (int i = 0; i < gm.blocks.Count; i++)
-                {
-                    if (gm.blocks[i].col == col + 1 &&
-                        gm.blocks[i].row == row)
-                    {
-                        // 목표 블럭을 찾아 col, row 값을 수정
-                        // 오른쪽 이동이므로 목표 블럭은 col -1 이동
-                        // 오른쪽 이동이므로 이동 블럭은 col +1 이동
-                        otherBlock = gm.blocks[i];
-                        otherBlock.col -= 1;
-                        col += 1;
-
-                        gm.LRTBCheck();
-                        gm.isStart = ReturnBlock(SwipeDir.Right);
-                        return;
-                    }
-                }
-            }
-            // Left
-            else if ((swipeAngle > 135 || swipeAngle <= -135) && col > 0)
-            {
-                for (int i = 0; i < gm.blocks.Count; i++)
-                {
-                    if (gm.blocks[i].col == col - 1 &&
-                        gm.blocks[i].row == row)
-                    {
-                        // 목표 블럭을 찾아 col, row 값을 수정
-                        // 왼쪽 이동이므로 목표 블럭은 col +1 이동
-                        // 왼쪽 이동이므로 이동 블럭은 col -1 이동
-                        otherBlock = gm.blocks[i];
-                        otherBlock.col += 1;
-                        col -= 1;
-
-                        gm.LRTBCheck();
-                        gm.isStart = ReturnBlock(SwipeDir.Left);
-                        return;
-                    }
-                }
-            }
             // Top
-            else if ((swipeAngle > 45 && swipeAngle <= 135) && row < gm.BoardSize.y)
+            if ((swipeAngle > 45 && swipeAngle <= 135) && row < gm.BoardSize.y)
             {
                 for (int i = 0; i < gm.blocks.Count; i++)
                 {
                     if (gm.blocks[i].col == col &&
                         gm.blocks[i].row == row + 1)
                     {
-                        // 목표 블럭을 찾아 col, row 값을 수정
-                        // 위쪽 이동이므로 목표 블럭은 row -1 이동
-                        // 위쪽 이동이므로 이동 블럭은 row +1 이동
+                        // 위쪽 이동이므로 목표 블럭은 -1 이동
+                        // 위쪽 이동이므로 이동 블럭은 +1 이동
                         otherBlock = gm.blocks[i];
                         otherBlock.row -= 1;
                         row += 1;
 
                         gm.LRTBCheck();
-                        gm.isStart = ReturnBlock(SwipeDir.Top);
+                        //gm.isStart = true;
+                        swipeDir = SwipeDir.Top;
+                        StartCoroutine(ReturnBlock());
                         return;
                     }
                 }
@@ -237,72 +201,96 @@ namespace XR_3MatchGame_Object
                     if (gm.blocks[i].col == col &&
                         gm.blocks[i].row == row - 1)
                     {
-                        // 목표 블럭을 찾아 col, row 값을 수정
-                        // 아래쪽 이동이므로 목표 블럭은 row +1 이동
-                        // 아래쪽 이동이므로 이동 블럭은 row
+                        // 아래쪽 이동이므로 목표 블럭은 +1 이동
+                        // 아래쪽 이동이므로 이동 블럭은 -1 이동
                         otherBlock = gm.blocks[i];
                         otherBlock.row += 1;
                         row -= 1;
 
                         gm.LRTBCheck();
-                        gm.isStart = ReturnBlock(SwipeDir.Bottom);
+                        //gm.isStart = true;
+                        swipeDir = SwipeDir.Bottom;
+                        StartCoroutine(ReturnBlock());
+                        return;
+                    }
+                }
+            }
+            // Left
+            else if ((swipeAngle > 135 || swipeAngle <= -135) && col > 0)
+            {
+                for (int i = 0; i < gm.blocks.Count; i++)
+                {
+                    if (gm.blocks[i].col == col - 1 &&
+                        gm.blocks[i].row == row)
+                    {
+                        // 왼쪽 이동이므로 목표 블럭은 +1 이동
+                        // 왼쪽 이동이므로 이동 블럭은 -1 이동
+                        otherBlock = gm.blocks[i];
+                        otherBlock.col += 1;
+                        col -= 1;
+
+                        gm.LRTBCheck();
+                        //gm.isStart = true;
+                        swipeDir = SwipeDir.Left;
+                        StartCoroutine(ReturnBlock());
+                        return;
+                    }
+                }
+            }
+            // Right
+            else if ((swipeAngle > -45 && swipeAngle <= 45) && col < gm.BoardSize.x)
+            {
+                for (int i = 0; i < gm.blocks.Count; i++)
+                {
+                    if (gm.blocks[i].col == col + 1 &&
+                        gm.blocks[i].row == row)
+                    {
+                        // 오른쪽 이동이므로 목표 블럭은 -1 이동
+                        // 오른쪽 이동이므로 이동 블럭은 +1 이동
+                        otherBlock = gm.blocks[i];
+                        otherBlock.col -= 1;
+                        col += 1;
+
+                        gm.LRTBCheck();
+                        //gm.isStart = true;
+                        swipeDir = SwipeDir.Right;
+                        StartCoroutine(ReturnBlock());
                         return;
                     }
                 }
             }
         }
 
-        private bool ReturnBlock(SwipeDir swipeDir)
+        private IEnumerator ReturnBlock()
         {
-            /// Lerp 사용해서 이동 구현 해야할듯
+            yield return new WaitForSeconds(.5f);
 
-            Debug.Log("ReturnBlock");
+            Debug.Log("TestFun");
 
-            if (leftBlock != null && rightBlock != null)
+            /**
+             * 여기에 들어오기 전에 일단 칸 이동
+             * 칸 이동 후 Top, Bottom, Left, Right에 존재하는 블럭을 업데이트
+             * 
+             * 
+             * Top, Bottom, Left, Right 방향으로 2칸씩 확인하도록 해야듯!
+             * 
+             */
+
+            switch (swipeDir)
             {
-                if (blockType == leftBlock.blockType &&
-                    blockType == rightBlock.blockType)
-                {
-                    return true;
-                }
-                else
-                {
-                    switch (swipeDir)
-                    {
-                        case SwipeDir.Top:
-                            otherBlock.row += 1;
-                            row -= 1;
+                case SwipeDir.Top:
+                    break;
 
-                            /// 여기서 블럭 이동하는 로직을 작성하면 될거같음
-                            if (Mathf.Abs(targetRow - transform.position.y) > .1f)
-                            {
-                                tempPosition = new Vector2(transform.position.x, targetRow);
-                                transform.position = Vector2.Lerp(transform.position, tempPosition, .05f);
-                            }
-                            break;
+                case SwipeDir.Bottom:
+                    break;
 
-                        case SwipeDir.Bottom:
-                            otherBlock.row -= 1;
-                            row += 1;
+                case SwipeDir.Left:
+                    break;
 
-                            break;
-
-                        case SwipeDir.Left:
-                            otherBlock.col -= 1;
-                            col += 1;
-
-                            break;
-
-                        case SwipeDir.Right:
-                            otherBlock.col += 1;
-                            col -= 1;
-
-                            break;
-                    }
-                }
+                case SwipeDir.Right:
+                    break;
             }
-
-            return false;
         }
-    }
+
+    }// End
 }
