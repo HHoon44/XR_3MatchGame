@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using XR_3MatchGame.Util;
 using XR_3MatchGame_Object;
@@ -10,11 +11,10 @@ namespace XR_3MatchGame_InGame
     public class GameManager : Singleton<GameManager>
     {
         public List<Block> blocks = new List<Block>();          // 인 게임 내에서 모든 블럭을 담아놓을 리스트
-        public List<Block> rowBlocks = new List<Block>();       // 한칸 씩 내리는 블럭을 담아놓을 리스트
+        public List<Block> downBlocks = new List<Block>();       // 한칸 씩 내리는 블럭을 담아놓을 리스트
 
-        public bool isStart = false;        // 블럭 체크를 실행 할지에 대한 여부
-
-        public bool isCheck = false;        // 현재 블럭 체크가 실행 중인가에 대한 여부
+        public bool isStart = false;        // 블럭 체크를 실행할것인가?
+        public bool isChecking = false;        // 현재 블럭 체크를 진행중인가?
 
         public Vector2Int BoardSize
         {
@@ -180,13 +180,12 @@ namespace XR_3MatchGame_InGame
         public IEnumerator BlockClear()
         {
             // 블럭 체크를 시작합니다
-            isCheck = true;
+            isChecking = true;
 
             var blockPool = ObjectPoolManager.Instance.GetPool<Block>(PoolType.Block);
 
             var size = (BoardSize.x * BoardSize.y);
 
-            // 현재 블럭
             Block curBlock = null;
 
             for (int i = 0; i < blocks.Count; i++)
@@ -224,19 +223,19 @@ namespace XR_3MatchGame_InGame
                                 if ((blocks[j].col == f_Col || blocks[j].col == m_Col || blocks[j].col == l_Col) &&
                                     blocks[j].row > b_Row)
                                 {
-                                    rowBlocks.Add(blocks[j]);
+                                    downBlocks.Add(blocks[j]);
                                 }
                             }
 
                             // 찾은 블럭들을 내려줍니다
-                            for (int j = 0; j < rowBlocks.Count; j++)
+                            for (int j = 0; j < downBlocks.Count; j++)
                             {
-                                var targetRow = rowBlocks[j].row -= 1;
+                                var targetRow = downBlocks[j].row -= 1;
 
-                                if (Mathf.Abs(targetRow - rowBlocks[j].transform.position.y) > .1f)
+                                if (Mathf.Abs(targetRow - downBlocks[j].transform.position.y) > .1f)
                                 {
-                                    Vector2 tempPosition = new Vector2(rowBlocks[j].transform.position.x, targetRow);
-                                    rowBlocks[j].transform.position = Vector2.Lerp(rowBlocks[j].transform.position, tempPosition, .05f);
+                                    Vector2 tempPosition = new Vector2(downBlocks[j].transform.position.x, targetRow);
+                                    downBlocks[j].transform.position = Vector2.Lerp(downBlocks[j].transform.position, tempPosition, .05f);
                                 }
                             }
                         }
@@ -252,7 +251,7 @@ namespace XR_3MatchGame_InGame
                         // 비어있는 칸에 새로운 블럭을 추가할 때 사용할 Col, Row 값을 담아놓습니다
                         // Row 값은 조건 연산자를 이용해서 설정합니다
                         var n_Col = f_Col;
-                        var n_Row = rowBlocks.Count > 0 ? rowBlocks[rowBlocks.Count - 1].row + 1 : b_Row;
+                        var n_Row = downBlocks.Count > 0 ? downBlocks[downBlocks.Count - 1].row + 1 : b_Row;
 
                         yield return new WaitForSeconds(.4f);
 
@@ -284,7 +283,7 @@ namespace XR_3MatchGame_InGame
                         }
 
                         LRTBCheck();
-                        rowBlocks.Clear();
+                        downBlocks.Clear();
                         i = 0;
                     }
                 }
@@ -319,19 +318,19 @@ namespace XR_3MatchGame_InGame
                             {
                                 if (blocks[j].col == b_Col && blocks[j].row > b_Row)
                                 {
-                                    rowBlocks.Add(blocks[j]);
+                                    downBlocks.Add(blocks[j]);
                                 }
                             }
 
-                            for (int j = 0; j < rowBlocks.Count; j++)
+                            for (int j = 0; j < downBlocks.Count; j++)
                             {
                                 // 찾은 블럭들의 한칸씩 내려줍니다
-                                var targetRow = rowBlocks[j].row -= 3;
+                                var targetRow = downBlocks[j].row -= 3;
 
-                                if (Mathf.Abs(targetRow - rowBlocks[j].transform.position.y) > .1f)
+                                if (Mathf.Abs(targetRow - downBlocks[j].transform.position.y) > .1f)
                                 {
-                                    Vector2 tempPosition = new Vector2(rowBlocks[j].transform.position.x, targetRow);
-                                    rowBlocks[j].transform.position = Vector2.Lerp(rowBlocks[j].transform.position, tempPosition, .05f);
+                                    Vector2 tempPosition = new Vector2(downBlocks[j].transform.position.x, targetRow);
+                                    downBlocks[j].transform.position = Vector2.Lerp(downBlocks[j].transform.position, tempPosition, .05f);
                                 }
                             }
                         }
@@ -345,7 +344,7 @@ namespace XR_3MatchGame_InGame
                         var emptyBlockCount = size - (blocks.Count);
 
                         /// 여기가 문제다
-                        var n_Row = rowBlocks.Count > 0 ? rowBlocks[rowBlocks.Count - 1].row + 1 : b_Row - 2;
+                        var n_Row = downBlocks.Count > 0 ? downBlocks[downBlocks.Count - 1].row + 1 : b_Row - 2;
 
                         yield return new WaitForSeconds(.4f);
 
@@ -365,14 +364,14 @@ namespace XR_3MatchGame_InGame
                         }
 
                         LRTBCheck();
-                        rowBlocks.Clear();
+                        downBlocks.Clear();
                         i = 0;
                     }
                 }
-            }
+            } 
 
             // 블럭 체크를 종료합니다
-            isCheck = false;
+            isChecking = false;
         }
     }
 }

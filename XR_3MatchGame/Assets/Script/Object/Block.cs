@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using XR_3MatchGame.Util;
 using XR_3MatchGame_InGame;
@@ -124,8 +126,9 @@ namespace XR_3MatchGame_Object
         /// </summary>
         private void CalculateAngle()
         {
-            if (gm.isCheck == true)
+            if (gm.isChecking == true)
             {
+                // 체크중 블럭 이동을 제어합니다
                 return;
             }
 
@@ -143,8 +146,6 @@ namespace XR_3MatchGame_Object
         {
             if (Mathf.Abs(targetCol - transform.position.x) > .1f)
             {
-                Debug.Log("BlockSwipe");
-
                 tempPosition = new Vector2(targetCol, transform.position.y);
                 transform.position = Vector2.Lerp(transform.position, tempPosition, .05f);
             }
@@ -185,8 +186,6 @@ namespace XR_3MatchGame_Object
                         otherBlock.row -= 1;
                         row += 1;
 
-                        gm.LRTBCheck();
-                        //gm.isStart = true;
                         swipeDir = SwipeDir.Top;
                         StartCoroutine(ReturnBlock());
                         return;
@@ -207,8 +206,6 @@ namespace XR_3MatchGame_Object
                         otherBlock.row += 1;
                         row -= 1;
 
-                        gm.LRTBCheck();
-                        //gm.isStart = true;
                         swipeDir = SwipeDir.Bottom;
                         StartCoroutine(ReturnBlock());
                         return;
@@ -229,8 +226,6 @@ namespace XR_3MatchGame_Object
                         otherBlock.col += 1;
                         col -= 1;
 
-                        gm.LRTBCheck();
-                        //gm.isStart = true;
                         swipeDir = SwipeDir.Left;
                         StartCoroutine(ReturnBlock());
                         return;
@@ -251,8 +246,6 @@ namespace XR_3MatchGame_Object
                         otherBlock.col -= 1;
                         col += 1;
 
-                        gm.LRTBCheck();
-                        //gm.isStart = true;
                         swipeDir = SwipeDir.Right;
                         StartCoroutine(ReturnBlock());
                         return;
@@ -263,34 +256,326 @@ namespace XR_3MatchGame_Object
 
         private IEnumerator ReturnBlock()
         {
-            yield return new WaitForSeconds(.5f);
+            gm.isChecking = true;
+            gm.LRTBCheck();
 
-            Debug.Log("TestFun");
+            // 게임 매니저가 들고 있는 블럭 리스트를 가져옵니다
+            var blocks = gm.blocks;
 
-            /**
-             * 여기에 들어오기 전에 일단 칸 이동
-             * 칸 이동 후 Top, Bottom, Left, Right에 존재하는 블럭을 업데이트
-             * 
-             * 
-             * Top, Bottom, Left, Right 방향으로 2칸씩 확인하도록 해야듯!
-             * 
-             */
+            // 같은 블럭 개수에 대한 카운트 입니다
+            var topCount = 0;
+            var bottomCount = 0;
+            var middleCount = 0;
+            var LeftCount = 0;
+            var RightCount = 0;
 
             switch (swipeDir)
             {
                 case SwipeDir.Top:
+                    // Top
+                    for (int i = 0; i < blocks.Count; i++)
+                    {
+                        if ((row + 1 == blocks[i].row || row + 2 == blocks[i].row) &&
+                            col == blocks[i].col)
+                        {
+                            if (blocks[i].blockType == blockType)
+                            {
+                                topCount++;
+                            }
+                        }
+                    }
+
+                    // Middle
+                    for (int i = 0; i < blocks.Count; i++)
+                    {
+                        if (col -1 == blocks[i].col || col + 1 == blocks[i].col &&
+                            row == blocks[i].row)
+                        {
+                            middleCount++;
+                        }
+                    }
+
+                    // Bottom
+                    for (int i = 0; i < blocks.Count; i++)
+                    {
+                        if ((row - 1 == blocks[i].row || row - 2 == blocks[i].row) &&
+                            col == blocks[i].col)
+                        {
+                            if (blocks[i].blockType == blockType)
+                            {
+                                bottomCount++;
+                            }
+                        }
+                    }
+
+                    // Left
+                    for (int i = 0; i < blocks.Count; i++)
+                    {
+                        if ((col - 1 == blocks[i].col || col - 2 == blocks[i].col) &&
+                            row == blocks[i].row)
+                        {
+                            if (blocks[i].blockType == blockType)
+                            {
+                                LeftCount++;
+                            }
+                        }
+                    }
+
+                    // Right
+                    for (int i = 0; i < blocks.Count; i++)
+                    {
+                        if ((col + 1 == blocks[i].col || col + 2 == blocks[i].col) &&
+                            row == blocks[i].row)
+                        {
+                            if (blocks[i].blockType == blockType)
+                            {
+                                RightCount++;
+                            }
+                        }
+                    }
+
+                    if (topCount < 2 && bottomCount < 2 && LeftCount < 2 && RightCount < 2 && middleCount < 2)
+                    {
+                        yield return new WaitForSeconds(.2f);
+                        otherBlock.row += 1;
+                        row -= 1;
+                    }
+                    else
+                    {
+                        gm.isStart = true;
+                    }
                     break;
 
                 case SwipeDir.Bottom:
+                    // Top
+                    for (int i = 0; i < blocks.Count; i++)
+                    {
+                        if ((row + 1 == blocks[i].row || row + 2 == blocks[i].row) &&
+                            col == blocks[i].col)
+                        {
+                            if (blocks[i].blockType == blockType)
+                            {
+                                topCount++;
+                            }
+                        }
+                    }
+
+                    // Bottom
+                    for (int i = 0; i < blocks.Count; i++)
+                    {
+                        if ((row - 1 == blocks[i].row || row - 2 == blocks[i].row) &&
+                            col == blocks[i].col)
+                        {
+                            if (blocks[i].blockType == blockType)
+                            {
+                                bottomCount++;
+                            }
+                        }
+                    }
+
+                    // Middle
+                    for (int i = 0; i < blocks.Count; i++)
+                    {
+                        if (col - 1 == blocks[i].col || col + 1 == blocks[i].col &&
+                            row == blocks[i].row)
+                        {
+                            middleCount++;
+                        }
+                    }
+
+                    // Left
+                    for (int i = 0; i < blocks.Count; i++)
+                    {
+                        if ((col - 1 == blocks[i].col || col - 2 == blocks[i].col) &&
+                            row == blocks[i].row)
+                        {
+                            if (blocks[i].blockType == blockType)
+                            {
+                                LeftCount++;
+                            }
+                        }
+                    }
+
+                    // Right
+                    for (int i = 0; i < blocks.Count; i++)
+                    {
+                        if ((col + 1 == blocks[i].col || col + 2 == blocks[i].col) &&
+                            row == blocks[i].row)
+                        {
+                            if (blocks[i].blockType == blockType)
+                            {
+                                RightCount++;
+                            }
+                        }
+                    }
+
+                    if (topCount < 2 && bottomCount < 2 && LeftCount < 2 && RightCount < 2 && middleCount < 2)
+                    {
+                        yield return new WaitForSeconds(.2f);
+                        otherBlock.row -= 1;
+                        row += 1;
+                    }
+                    else
+                    {
+                        gm.isStart = true;
+                    }
                     break;
 
                 case SwipeDir.Left:
+                    // Top
+                    for (int i = 0; i < blocks.Count; i++)
+                    {
+                        if ((row + 1 == blocks[i].row || row + 2 == blocks[i].row) &&
+                            col == blocks[i].col)
+                        {
+                            if (blocks[i].blockType == blockType)
+                            {
+                                topCount++;
+                            }
+                        }
+                    }
+
+                    // Bottom
+                    for (int i = 0; i < blocks.Count; i++)
+                    {
+                        if ((row - 1 == blocks[i].row || row - 2 == blocks[i].row) &&
+                            col == blocks[i].col)
+                        {
+                            if (blocks[i].blockType == blockType)
+                            {
+                                bottomCount++;
+                            }
+                        }
+                    }
+
+                    // Middle
+                    for (int i = 0; i < blocks.Count; i++)
+                    {
+                        if (row - 1 == blocks[i].row || row + 1 == blocks[i].row &&
+                            col == blocks[i].col)
+                        {
+                            middleCount++;
+                        }
+                    }
+
+                    // Left
+                    for (int i = 0; i < blocks.Count; i++)
+                    {
+                        if ((col - 1 == blocks[i].col || col - 2 == blocks[i].col) &&
+                            row == blocks[i].row)
+                        {
+                            if (blocks[i].blockType == blockType)
+                            {
+                                LeftCount++;
+                            }
+                        }
+                    }
+
+                    // Right
+                    for (int i = 0; i < blocks.Count; i++)
+                    {
+                        if ((col + 1 == blocks[i].col || col + 2 == blocks[i].col) &&
+                            row == blocks[i].row)
+                        {
+                            if (blocks[i].blockType == blockType)
+                            {
+                                RightCount++;
+                            }
+                        }
+                    }
+
+                    if (topCount < 2 && bottomCount < 2 && LeftCount < 2 && RightCount < 2 && middleCount < 2)
+                    {
+                        yield return new WaitForSeconds(.2f);
+                        otherBlock.col -= 1;
+                        col += 1;
+                    }
+                    else
+                    {
+                        gm.isStart = true;
+                    }
                     break;
 
                 case SwipeDir.Right:
+                    // Top
+                    for (int i = 0; i < blocks.Count; i++)
+                    {
+                        if ((row + 1 == blocks[i].row || row + 2 == blocks[i].row) &&
+                            col == blocks[i].col)
+                        {
+                            if (blocks[i].blockType == blockType)
+                            {
+                                topCount++;
+                            }
+                        }
+                    }
+
+                    // Bottom
+                    for (int i = 0; i < blocks.Count; i++)
+                    {
+                        if ((row - 1 == blocks[i].row || row - 2 == blocks[i].row) &&
+                            col == blocks[i].col)
+                        {
+                            if (blocks[i].blockType == blockType)
+                            {
+                                bottomCount++;
+                            }
+                        }
+                    }
+
+                    // Middle
+                    for (int i = 0; i < blocks.Count; i++)
+                    {
+                        if (row - 1 == blocks[i].row || row + 1 == blocks[i].row &&
+                            col == blocks[i].col)
+                        {
+                            middleCount++;
+                        }
+                    }
+
+                    // Left
+                    for (int i = 0; i < blocks.Count; i++)
+                    {
+                        if ((col - 1 == blocks[i].col || col - 2 == blocks[i].col) &&
+                            row == blocks[i].row)
+                        {
+                            if (blocks[i].blockType == blockType)
+                            {
+                                LeftCount++;
+                            }
+                        }
+                    }
+
+                    // Right
+                    for (int i = 0; i < blocks.Count; i++)
+                    {
+                        if ((col + 1 == blocks[i].col || col + 2 == blocks[i].col) &&
+                            row == blocks[i].row)
+                        {
+                            if (blocks[i].blockType == blockType)
+                            {
+                                RightCount++;
+                            }
+                        }
+                    }
+
+                    if (topCount < 2 && bottomCount < 2 && LeftCount < 2 && RightCount < 2 && middleCount < 2)
+                    {
+                        yield return new WaitForSeconds(.2f);
+                        otherBlock.col += 1;
+                        col -= 1;
+                    }
+                    else
+                    {
+                        gm.isStart = true;
+                    }
                     break;
             }
-        }
 
-    }// End
+            gm.LRTBCheck();
+            gm.isChecking = false;
+
+            yield return new WaitForSeconds(.5f);
+        }
+    }
 }
