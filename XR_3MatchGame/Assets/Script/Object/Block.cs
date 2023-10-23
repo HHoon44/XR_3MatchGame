@@ -132,7 +132,7 @@ namespace XR_3MatchGame_Object
                 return;
             }
 
-            // 마우스 드래그 각도를 계산한다
+            // 마우스 드래그 각도를 계산합니다
             swipeAngle = Mathf.Atan2(finalTouchPosition.y - firstTouchPosition.y,
                 finalTouchPosition.x - firstTouchPosition.x) * 180 / Mathf.PI;
 
@@ -146,6 +146,8 @@ namespace XR_3MatchGame_Object
         {
             if (Mathf.Abs(targetCol - transform.position.x) > .1f)
             {
+                Debug.Log("X_BlockSwipe");
+
                 tempPosition = new Vector2(targetCol, transform.position.y);
                 transform.position = Vector2.Lerp(transform.position, tempPosition, .05f);
             }
@@ -157,6 +159,8 @@ namespace XR_3MatchGame_Object
 
             if (Mathf.Abs(targetRow - transform.position.y) > .1f)
             {
+                Debug.Log("Y_BlockSwipe");
+
                 tempPosition = new Vector2(transform.position.x, targetRow);
                 transform.position = Vector2.Lerp(transform.position, tempPosition, .05f);
             }
@@ -256,6 +260,9 @@ namespace XR_3MatchGame_Object
 
         private IEnumerator ReturnBlock()
         {
+            /// 이녀석 중요!!
+            yield return new WaitForSeconds(.3f);
+
             gm.isChecking = true;
             gm.LRTBCheck();
 
@@ -272,60 +279,37 @@ namespace XR_3MatchGame_Object
             switch (swipeDir)
             {
                 case SwipeDir.Top:
-                    // Top
                     for (int i = 0; i < blocks.Count; i++)
                     {
-                        if ((row + 1 == blocks[i].row || row + 2 == blocks[i].row) &&
-                            col == blocks[i].col)
+                        // Top
+                        if ((row + 1 == blocks[i].row || row + 2 == blocks[i].row) && col == blocks[i].col)
                         {
                             if (blocks[i].blockType == blockType)
                             {
                                 topCount++;
                             }
                         }
-                    }
 
-                    // Middle
-                    for (int i = 0; i < blocks.Count; i++)
-                    {
-                        if (col -1 == blocks[i].col || col + 1 == blocks[i].col &&
-                            row == blocks[i].row)
-                        {
-                            middleCount++;
-                        }
-                    }
-
-                    // Bottom
-                    for (int i = 0; i < blocks.Count; i++)
-                    {
-                        if ((row - 1 == blocks[i].row || row - 2 == blocks[i].row) &&
-                            col == blocks[i].col)
+                        // Middle
+                        if ((col - 1 == blocks[i].col || col + 1 == blocks[i].col) && row == blocks[i].row)
                         {
                             if (blocks[i].blockType == blockType)
                             {
-                                bottomCount++;
+                                middleCount++;
                             }
                         }
-                    }
 
-                    // Left
-                    for (int i = 0; i < blocks.Count; i++)
-                    {
-                        if ((col - 1 == blocks[i].col || col - 2 == blocks[i].col) &&
-                            row == blocks[i].row)
+                        // Left
+                        if ((col - 1 == blocks[i].col || col - 2 == blocks[i].col) && row == blocks[i].row)
                         {
                             if (blocks[i].blockType == blockType)
                             {
                                 LeftCount++;
                             }
                         }
-                    }
 
-                    // Right
-                    for (int i = 0; i < blocks.Count; i++)
-                    {
-                        if ((col + 1 == blocks[i].col || col + 2 == blocks[i].col) &&
-                            row == blocks[i].row)
+                        // Right
+                        if ((col + 1 == blocks[i].col || col + 2 == blocks[i].col) && row == blocks[i].row)
                         {
                             if (blocks[i].blockType == blockType)
                             {
@@ -334,73 +318,53 @@ namespace XR_3MatchGame_Object
                         }
                     }
 
-                    if (topCount < 2 && bottomCount < 2 && LeftCount < 2 && RightCount < 2 && middleCount < 2)
+                    if (topCount < 2 && middleCount < 2 && LeftCount < 2 && RightCount < 2)
                     {
+                        // 2개 이상의 블럭이 존재하지 않으므로 이동한 블럭을 원 위치로 되돌립니다
                         yield return new WaitForSeconds(.2f);
+
                         otherBlock.row += 1;
                         row -= 1;
                     }
                     else
                     {
+                        // 2개 이상의 블럭이 존재하므로 블럭 체크를 실행합니다
                         gm.isStart = true;
                     }
                     break;
 
                 case SwipeDir.Bottom:
-                    // Top
                     for (int i = 0; i < blocks.Count; i++)
                     {
-                        if ((row + 1 == blocks[i].row || row + 2 == blocks[i].row) &&
-                            col == blocks[i].col)
-                        {
-                            if (blocks[i].blockType == blockType)
-                            {
-                                topCount++;
-                            }
-                        }
-                    }
-
-                    // Bottom
-                    for (int i = 0; i < blocks.Count; i++)
-                    {
-                        if ((row - 1 == blocks[i].row || row - 2 == blocks[i].row) &&
-                            col == blocks[i].col)
+                        // Bottom
+                        if ((row - 1 == blocks[i].row || row - 2 == blocks[i].row) && col == blocks[i].col)
                         {
                             if (blocks[i].blockType == blockType)
                             {
                                 bottomCount++;
                             }
                         }
-                    }
 
-                    // Middle
-                    for (int i = 0; i < blocks.Count; i++)
-                    {
-                        if (col - 1 == blocks[i].col || col + 1 == blocks[i].col &&
-                            row == blocks[i].row)
+                        // Middle
+                        if ((col - 1 == blocks[i].col || col + 1 == blocks[i].col) && row == blocks[i].row)
                         {
-                            middleCount++;
+                            if (blocks[i].blockType == blockType)
+                            {
+                                middleCount++;
+                            }
                         }
-                    }
 
-                    // Left
-                    for (int i = 0; i < blocks.Count; i++)
-                    {
-                        if ((col - 1 == blocks[i].col || col - 2 == blocks[i].col) &&
-                            row == blocks[i].row)
+                        // Left
+                        if ((col - 1 == blocks[i].col || col - 2 == blocks[i].col) && row == blocks[i].row)
                         {
                             if (blocks[i].blockType == blockType)
                             {
                                 LeftCount++;
                             }
                         }
-                    }
 
-                    // Right
-                    for (int i = 0; i < blocks.Count; i++)
-                    {
-                        if ((col + 1 == blocks[i].col || col + 2 == blocks[i].col) &&
-                            row == blocks[i].row)
+                        //Right
+                        if ((col + 1 == blocks[i].col || col + 2 == blocks[i].col) && row == blocks[i].row)
                         {
                             if (blocks[i].blockType == blockType)
                             {
@@ -409,60 +373,53 @@ namespace XR_3MatchGame_Object
                         }
                     }
 
-                    if (topCount < 2 && bottomCount < 2 && LeftCount < 2 && RightCount < 2 && middleCount < 2)
+                    if (bottomCount < 2 && middleCount < 2 && LeftCount < 2 && RightCount < 2)
                     {
+                        // 2개 이상의 블럭이 존재하지 않으므로 이동한 블럭을 원 위치로 되돌립니다
                         yield return new WaitForSeconds(.2f);
+
                         otherBlock.row -= 1;
                         row += 1;
                     }
                     else
                     {
+                        // 2개 이상의 블럭이 존재하므로 블럭 체크를 실행합니다
                         gm.isStart = true;
                     }
                     break;
 
                 case SwipeDir.Left:
-                    // Top
                     for (int i = 0; i < blocks.Count; i++)
                     {
-                        if ((row + 1 == blocks[i].row || row + 2 == blocks[i].row) &&
-                            col == blocks[i].col)
+                        // Top
+                        if ((row + 1 == blocks[i].row || row + 2 == blocks[i].row) && col == blocks[i].col)
                         {
                             if (blocks[i].blockType == blockType)
                             {
                                 topCount++;
                             }
                         }
-                    }
 
-                    // Bottom
-                    for (int i = 0; i < blocks.Count; i++)
-                    {
-                        if ((row - 1 == blocks[i].row || row - 2 == blocks[i].row) &&
-                            col == blocks[i].col)
+                        // Bottom
+                        if ((row - 1 == blocks[i].row || row - 2 == blocks[i].row) && col == blocks[i].col)
                         {
                             if (blocks[i].blockType == blockType)
                             {
                                 bottomCount++;
                             }
                         }
-                    }
 
-                    // Middle
-                    for (int i = 0; i < blocks.Count; i++)
-                    {
-                        if (row - 1 == blocks[i].row || row + 1 == blocks[i].row &&
-                            col == blocks[i].col)
+                        // Middle
+                        if ((row - 1 == blocks[i].row || row + 1 == blocks[i].row) && col == blocks[i].col)
                         {
-                            middleCount++;
+                            if (blocks[i].blockType == blockType)
+                            {
+                                middleCount++;
+                            }
                         }
-                    }
 
-                    // Left
-                    for (int i = 0; i < blocks.Count; i++)
-                    {
-                        if ((col - 1 == blocks[i].col || col - 2 == blocks[i].col) &&
-                            row == blocks[i].row)
+                        // Left
+                        if ((col - 1 == blocks[i].col || col - 2 == blocks[i].col) && row == blocks[i].row)
                         {
                             if (blocks[i].blockType == blockType)
                             {
@@ -471,86 +428,53 @@ namespace XR_3MatchGame_Object
                         }
                     }
 
-                    // Right
-                    for (int i = 0; i < blocks.Count; i++)
+                    if (topCount < 2 && bottomCount < 2 && middleCount < 2 && LeftCount < 2)
                     {
-                        if ((col + 1 == blocks[i].col || col + 2 == blocks[i].col) &&
-                            row == blocks[i].row)
-                        {
-                            if (blocks[i].blockType == blockType)
-                            {
-                                RightCount++;
-                            }
-                        }
-                    }
-
-                    if (topCount < 2 && bottomCount < 2 && LeftCount < 2 && RightCount < 2 && middleCount < 2)
-                    {
+                        // 2개 이상의 블럭이 존재하지 않으므로 이동한 블럭을 원 위치로 되돌립니다
                         yield return new WaitForSeconds(.2f);
+
                         otherBlock.col -= 1;
                         col += 1;
                     }
                     else
                     {
+                        // 2개 이상의 블럭이 존재하므로 블럭 체크를 실행합니다
                         gm.isStart = true;
                     }
                     break;
 
                 case SwipeDir.Right:
-                    // Top
                     for (int i = 0; i < blocks.Count; i++)
                     {
-                        if ((row + 1 == blocks[i].row || row + 2 == blocks[i].row) &&
-                            col == blocks[i].col)
+                        // Top
+                        if ((row + 1 == blocks[i].row || row + 2 == blocks[i].row) && col == blocks[i].col)
                         {
                             if (blocks[i].blockType == blockType)
                             {
                                 topCount++;
                             }
                         }
-                    }
 
-                    // Bottom
-                    for (int i = 0; i < blocks.Count; i++)
-                    {
-                        if ((row - 1 == blocks[i].row || row - 2 == blocks[i].row) &&
-                            col == blocks[i].col)
+                        // Bottom
+                        if ((row - 1 == blocks[i].row || row - 2 == blocks[i].row) && col == blocks[i].col)
                         {
                             if (blocks[i].blockType == blockType)
                             {
                                 bottomCount++;
                             }
                         }
-                    }
 
-                    // Middle
-                    for (int i = 0; i < blocks.Count; i++)
-                    {
-                        if (row - 1 == blocks[i].row || row + 1 == blocks[i].row &&
-                            col == blocks[i].col)
-                        {
-                            middleCount++;
-                        }
-                    }
-
-                    // Left
-                    for (int i = 0; i < blocks.Count; i++)
-                    {
-                        if ((col - 1 == blocks[i].col || col - 2 == blocks[i].col) &&
-                            row == blocks[i].row)
+                        // Middle
+                        if ((row - 1 == blocks[i].row || row + 1 == blocks[i].row) && col == blocks[i].col)
                         {
                             if (blocks[i].blockType == blockType)
                             {
-                                LeftCount++;
+                                middleCount++;
                             }
                         }
-                    }
 
-                    // Right
-                    for (int i = 0; i < blocks.Count; i++)
-                    {
-                        if ((col + 1 == blocks[i].col || col + 2 == blocks[i].col) &&
-                            row == blocks[i].row)
+                        // Right
+                        if ((col + 1 == blocks[i].col || col + 2 == blocks[i].col) && row == blocks[i].row)
                         {
                             if (blocks[i].blockType == blockType)
                             {
@@ -559,23 +483,25 @@ namespace XR_3MatchGame_Object
                         }
                     }
 
-                    if (topCount < 2 && bottomCount < 2 && LeftCount < 2 && RightCount < 2 && middleCount < 2)
+                    if (topCount < 2 && bottomCount < 2 && middleCount < 2 && RightCount < 2)
                     {
+                        // 2개 이상의 블럭이 존재하지 않으므로 이동한 블럭을 원 위치로 되돌립니다
                         yield return new WaitForSeconds(.2f);
+
                         otherBlock.col += 1;
                         col -= 1;
                     }
                     else
                     {
+                        // 2개 이상의 블럭이 존재하므로 블럭 체크를 실행합니다
                         gm.isStart = true;
                     }
                     break;
             }
 
+            // 마무리 작업
             gm.LRTBCheck();
             gm.isChecking = false;
-
-            yield return new WaitForSeconds(.5f);
         }
     }
 }
