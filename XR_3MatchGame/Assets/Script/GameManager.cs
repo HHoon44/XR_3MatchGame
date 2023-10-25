@@ -190,18 +190,37 @@ namespace XR_3MatchGame_InGame
 
             Block curBlock = null;
 
+            /// 이렇게 정말 하고싶지 않지만.. 일단 이렇게 해보자.. 수정은 나중에! 일단은 되면 되니깐!
+            List<Block> rowBlock = new List<Block>();
 
+            Block boom = null;
+
+            /// 폭탄 블럭을 기준으로 4가지 상황를 비교하고 그 조건에 맞는 블럭 삭제
+            /// 삭제하면 그 자리에 새로운 블럭 나오도록! (만약에 위에 블럭이 존재한다면 블럭 이동부터 해줘야함)
             for (int i = 0; i < blocks.Count; i++)
             {
                 if (blocks[i].blockType == BlockType.Boom)
                 {
-                    // 이제 뭐.. i번째 블럭 폭탄으로 바꿔주고 -> 스프라이트만 교체하도록
-                    blocks[i].spriteRenderer.sprite = SpriteLoader.GetSprite(AtlasType.BlockAtlas, blocks[i].blockType.ToString());
+                    // 블럭 스프라이트를 폭탄 스프라이로 변경
+                    blocks[i].spriteRenderer.sprite =
+                        SpriteLoader.GetSprite(AtlasType.BlockAtlas, blocks[i].blockType.ToString());
 
-
-                    // 같은 Col 아니면 Row에 존재하는 (4가지 조건에 맞는 블럭) 삭제 작업
-                    // 삭제하면 그 자리에 새로운 블럭 나오도록 (만약에 위에 블럭이 존재한다면 블럭 이동부터 해줘야함)
+                    boom = blocks[i];
                 }
+
+                if (boom != null)
+                {
+                    switch (boom.boomType)
+                    {
+                        case BoomType.ColBoom:
+                            /// 같은 Col에 존재하는 블럭들을 저장하는 로직
+                            break;
+                        case BoomType.RowBoom:
+                            /// 같은 Row에 존재하는 블럭들을 저장하는 로직
+                            break;
+                    }
+                }
+
             }
 
             for (int i = 0; i < blocks.Count; i++)
@@ -384,7 +403,7 @@ namespace XR_3MatchGame_InGame
                         i = 0;
                     }
                 }
-            } 
+            }
 
             // 블럭 체크를 종료합니다
             isChecking = false;

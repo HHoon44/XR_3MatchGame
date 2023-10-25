@@ -13,5 +13,7 @@
 
 - OtherBlock은 BoomCheck를 어디서 해줘야 하지?
 
+- 
+
 < 버그 >
--           
+- 

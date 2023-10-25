@@ -38,7 +38,8 @@ namespace XR_3MatchGame_Object
         private GameManager gm;
 
         public BlockType blockType = BlockType.None;        // 현재 블럭의 타입
-        private SwipeDir swipeDir = SwipeDir.None;
+        public BoomType boomType = BoomType.None;           // 만약에 블럭이 폭탄이라면 어떤 폭탄인지에 대한 타입
+        private SwipeDir swipeDir = SwipeDir.None;          
 
         // Test
         public BlockType topType = BlockType.None;
@@ -702,6 +703,7 @@ namespace XR_3MatchGame_Object
             {
                 // 왼쪽으로 3개의 같은 블럭이 존재하므로
                 // 현재 블럭은 폭탄
+                curBlock.boomType = BoomType.ColBoom;
                 curBlock.blockType = BlockType.Boom;
                 return;
             }
@@ -727,6 +729,7 @@ namespace XR_3MatchGame_Object
             {
                 // 왼쪽으로 2개 오른쪽으로 1개 같은 블럭이 존재하므로
                 // 현재 블럭은 폭탄
+                curBlock.boomType = BoomType.ColBoom;
                 curBlock.blockType = BlockType.Boom;
                 return;
             }
@@ -752,6 +755,7 @@ namespace XR_3MatchGame_Object
             {
                 // 왼쪽으로 1개 오른쪽으로 2개 같은 블럭이 존재하므로
                 // 현재 블럭은 폭탄
+                curBlock.boomType = BoomType.ColBoom;
                 curBlock.blockType = BlockType.Boom;
                 return;
             }
@@ -768,6 +772,7 @@ namespace XR_3MatchGame_Object
             {
                 // 오른쪽으로 3개 같은 블럭이 존재하므로
                 // 현재 블럭은 폭탄
+                curBlock.boomType = BoomType.ColBoom;
                 curBlock.blockType = BlockType.Boom;
                 return;
             }
@@ -818,6 +823,7 @@ namespace XR_3MatchGame_Object
             {
                 // 위쪽으로 3개 같은 블럭이 존재하므로
                 // 현재 블럭은 폭탄
+                curBlock.boomType = BoomType.RowBoom;
                 curBlock.blockType = BlockType.Boom;
             }
 
@@ -842,6 +848,7 @@ namespace XR_3MatchGame_Object
             {
                 // 위쪽으로 2개 아래쪽으로 1개 같은 블럭이 존재하므로
                 // 현재 블럭은 폭탄
+                curBlock.boomType = BoomType.RowBoom;
                 curBlock.blockType = BlockType.Boom;
             }
 
@@ -864,6 +871,7 @@ namespace XR_3MatchGame_Object
             {
                 // 위쪽으로 1개 아래쪽으로 2개 같은 블럭이 존재하므로
                 // 현재 블럭은 폭탄
+                curBlock.boomType = BoomType.RowBoom;
                 curBlock.blockType = BlockType.Boom;
                 return;
             }
@@ -877,6 +885,7 @@ namespace XR_3MatchGame_Object
             {
                 // 아래쪽으로 3개 같은 블럭이 존재하므로
                 // 현재 블럭은 폭탄
+                curBlock.boomType = BoomType.RowBoom;
                 curBlock.blockType = BlockType.Boom;
                 return;
             }

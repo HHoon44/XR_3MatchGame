@@ -24,4 +24,9 @@ namespace XR_3MatchGame.Util
     { 
         None, Top, Bottom, Left, Right
     }
+
+    public enum BoomType
+    { 
+        None, ColBoom, RowBoom
+    }
 }
