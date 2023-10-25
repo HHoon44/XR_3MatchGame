@@ -17,7 +17,7 @@ namespace XR_3MatchGame.Util
 
     public enum BlockType
     {
-        None, Blue, Cream, DarkBlue, Green, Pink, Purple
+        None, Blue, Cream, DarkBlue, Green, Pink, Purple, Boom
     }
 
     public enum SwipeDir

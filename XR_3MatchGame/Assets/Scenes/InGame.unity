@@ -238,9 +238,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blocks: []
-  rowBlocks: []
+  downBlocks: []
   isStart: 0
-  isCheck: 0
+  isChecking: 0
 --- !u!1 &993903186
 GameObject:
   m_ObjectHideFlags: 0
@@ -477,7 +477,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: -2
-  m_Sprite: {fileID: 21300000, guid: 9ad7cb6824dc8b24aa1ed742ae5c4d3e, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 3bc211c4f4aac40c4a21856c66582d80, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -506,7 +506,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1528020414
 MonoBehaviour:
   m_ObjectHideFlags: 0

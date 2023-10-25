@@ -38,6 +38,7 @@ SpriteAtlas:
     - {fileID: 2800000, guid: 1b0e1cd4908fe4dc6aafe221971b1d45, type: 3}
     - {fileID: 2800000, guid: b383e523e729348fea38385365c81347, type: 3}
     - {fileID: 2800000, guid: 36842a4d4c9d544dd9d80d48924edf2e, type: 3}
+    - {fileID: 2800000, guid: 081f11e542eb1e0439c95d597c90cfd8, type: 3}
     bindAsDefault: 1
     isAtlasV2: 0
     cachedData: {fileID: 0}
@@ -46,6 +47,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: b383e523e729348fea38385365c81347, type: 3}
   - {fileID: 21300000, guid: 1f65eb831ffc34ce8bd3bad330129fd8, type: 3}
   - {fileID: 21300000, guid: 1b0e1cd4908fe4dc6aafe221971b1d45, type: 3}
+  - {fileID: 21300000, guid: 081f11e542eb1e0439c95d597c90cfd8, type: 3}
   - {fileID: 21300000, guid: 67e2869722de343228da2628fce2ef41, type: 3}
   - {fileID: 21300000, guid: f358bcebcb4e0481e90f3123ee09ba9e, type: 3}
   - {fileID: 21300000, guid: 36842a4d4c9d544dd9d80d48924edf2e, type: 3}
@@ -53,6 +55,7 @@ SpriteAtlas:
   - Pink
   - Green
   - DarkBlue
+  - Boom
   - Cream
   - Blue
   - Purple

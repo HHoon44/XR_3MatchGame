@@ -4,6 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using XR_3MatchGame.Util;
 using XR_3MatchGame_Object;
+using XR_3MatchGame_Resource;
 using XR_3MatchGame_Util;
 
 namespace XR_3MatchGame_InGame
@@ -179,14 +180,29 @@ namespace XR_3MatchGame_InGame
         /// <returns></returns>
         public IEnumerator BlockClear()
         {
+            /// 폭탄 블럭은 따로 설정 해줘야할듯
+
             // 블럭 체크를 시작합니다
             isChecking = true;
 
             var blockPool = ObjectPoolManager.Instance.GetPool<Block>(PoolType.Block);
-
             var size = (BoardSize.x * BoardSize.y);
 
             Block curBlock = null;
+
+
+            for (int i = 0; i < blocks.Count; i++)
+            {
+                if (blocks[i].blockType == BlockType.Boom)
+                {
+                    // 이제 뭐.. i번째 블럭 폭탄으로 바꿔주고 -> 스프라이트만 교체하도록
+                    blocks[i].spriteRenderer.sprite = SpriteLoader.GetSprite(AtlasType.BlockAtlas, blocks[i].blockType.ToString());
+
+
+                    // 같은 Col 아니면 Row에 존재하는 (4가지 조건에 맞는 블럭) 삭제 작업
+                    // 삭제하면 그 자리에 새로운 블럭 나오도록 (만약에 위에 블럭이 존재한다면 블럭 이동부터 해줘야함)
+                }
+            }
 
             for (int i = 0; i < blocks.Count; i++)
             {
