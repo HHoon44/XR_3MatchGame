@@ -11,8 +11,9 @@ namespace XR_3MatchGame_InGame
 {
     public class GameManager : Singleton<GameManager>
     {
-        public List<Block> blocks = new List<Block>();          // 인 게임 내에서 모든 블럭을 담아놓을 리스트
-        public List<Block> downBlocks = new List<Block>();       // 한칸 씩 내리는 블럭을 담아놓을 리스트
+        public List<Block> blocks = new List<Block>();              // 인 게임 내에서 모든 블럭을 담아놓을 리스트
+
+        public List<Block> checkBlocks = new List<Block>();         // 조건에 의해 사용해야할 블럭을 담아놓을 리스트
 
         public bool isStart = false;        // 블럭 체크를 실행할것인가?
         public bool isChecking = false;        // 현재 블럭 체크를 진행중인가?
@@ -180,9 +181,13 @@ namespace XR_3MatchGame_InGame
         /// <returns></returns>
         public IEnumerator BlockClear()
         {
+            /// 시작 할 때 checkBlock의 개수가 3이 아니면 바로 블럭 체킹 들어가고
+            /// 아니면 폭탄 체킹 시작
+            /// checkBlock 클리어 해주는거 잊으면 안됨
+
             /// 폭탄 블럭은 따로 설정 해줘야할듯
 
-            // 블럭 체크를 시작합니다
+            // 체크 시작
             isChecking = true;
 
             var blockPool = ObjectPoolManager.Instance.GetPool<Block>(PoolType.Block);
@@ -190,52 +195,83 @@ namespace XR_3MatchGame_InGame
 
             Block curBlock = null;
 
-            /// 이렇게 정말 하고싶지 않지만.. 일단 이렇게 해보자.. 수정은 나중에! 일단은 되면 되니깐!
-            List<Block> rowBlock = new List<Block>();
-
-            Block boom = null;
-
             /// 폭탄 블럭을 기준으로 4가지 상황를 비교하고 그 조건에 맞는 블럭 삭제
             /// 삭제하면 그 자리에 새로운 블럭 나오도록! (만약에 위에 블럭이 존재한다면 블럭 이동부터 해줘야함)
+
             for (int i = 0; i < blocks.Count; i++)
             {
+                // Boom 체크
                 if (blocks[i].blockType == BlockType.Boom)
                 {
-                    // 블럭 스프라이트를 폭탄 스프라이로 변경
+                    // 폭탄 스프라이트로 변경
                     blocks[i].spriteRenderer.sprite =
                         SpriteLoader.GetSprite(AtlasType.BlockAtlas, blocks[i].blockType.ToString());
 
-                    boom = blocks[i];
-                }
+                    // 폭탄 저장
+                    curBlock = blocks[i];
 
-                if (boom != null)
-                {
-                    switch (boom.boomType)
+                    /// 현재 폭탄이 무슨 타입의 폭탄인지 확인 해야함 ( Col, Row )
+                    /// 확인 하고 Col 폭탄이면 같은 Row에 있는 블럭들 모두 가져와서 4가지 조건에 맞게 확인해야함
+                    /// Row 폭탄이면 같은 Col에 있는 블럭들 모두 가져와서 4가지 조건에 맞게 확인해야함
+
+                    // 폭탄 타입에 따라 작업 실행
+                    switch (curBlock.boomType)
                     {
                         case BoomType.ColBoom:
-                            /// 같은 Col에 존재하는 블럭들을 저장하는 로직
+                            /*
+                                // 2 : 1
+                                if (curBlock.col - 1 == test[j].col || curBlock.col - 2 == test[j].col || curBlock.col + 1 == test[j].col)
+                                {
+                                    checkBlocks.Add(test[j]);
+                                }
+
+                                // 1 : 2
+                                if (curBlock.col - 1 == test[j].col || curBlock.col + 1 == test[j].col || curBlock.col + 2 == test[j].col)
+                                {
+                                    checkBlocks.Add(test[j]);
+                                }
+
+                                // 0 : 3
+                                if (curBlock.col + 1 == test[j].col || curBlock.col + 2 == test[j].col || curBlock.col + 3 == test[j].col)
+                                {
+                                    checkBlocks.Add(test[j]);
+                                }
+                             */
+
+                            for (int j = 0; j < blocks.Count; j++)
+                            {
+                                if (curBlock.col - 1 )
+                                {
+
+                                }
+                            }
+
+
+                            // 3 : 0
+                            if (curBlock.col - 1 == test[j].col || curBlock.col - 2 == test[j].col || curBlock.col - 3 == test[j].col)
+                            {
+                                // 현재 블럭이 폭탄이라는 것은 블럭 매칭이 무조건 일어나야 하므로
+                                checkBlocks.Add(test[j]);
+                            }
+
                             break;
+
                         case BoomType.RowBoom:
-                            /// 같은 Row에 존재하는 블럭들을 저장하는 로직
                             break;
                     }
                 }
 
-            }
-
-            for (int i = 0; i < blocks.Count; i++)
-            {
-                // Left, Right 체크를 시작합니다
+                // Left, Right 체크
                 if (blocks[i].leftBlock != null && blocks[i].rightBlock != null)
                 {
-                    // i번째에 존재하는 블럭의 Left, Right를 체크합니다
-                    if (blocks[i].blockType == blocks[i].leftBlock.blockType &&
-                        blocks[i].blockType == blocks[i].rightBlock.blockType)
+                    // 블럭의 Left Right를 체크
+                    if (blocks[i].blockType == blocks[i].leftBlock.blockType && blocks[i].blockType == blocks[i].rightBlock.blockType)
                     {
                         curBlock = blocks[i];
 
                         yield return new WaitForSeconds(.4f);
 
+                        // 풀에 반환
                         blockPool.ReturnPoolableObject(curBlock.rightBlock);
                         blockPool.ReturnPoolableObject(curBlock.leftBlock);
                         blockPool.ReturnPoolableObject(curBlock);
@@ -246,10 +282,10 @@ namespace XR_3MatchGame_InGame
                         var m_Col = curBlock.col;
                         var l_Col = curBlock.rightBlock.col;
 
-                        // 베이스가될 Row값을 담아놓습니다
+                        // 베이스 Row 값
                         var b_Row = curBlock.row;
 
-                        // 체크한 블럭이 맨 위 블럭인지 확인합니다
+                        // 체크하려는 블럭이 맨 위에 존재하는지 확인
                         if (curBlock.row != (BoardSize.y - 1))
                         {
                             for (int j = 0; j < blocks.Count; j++)
@@ -258,19 +294,19 @@ namespace XR_3MatchGame_InGame
                                 if ((blocks[j].col == f_Col || blocks[j].col == m_Col || blocks[j].col == l_Col) &&
                                     blocks[j].row > b_Row)
                                 {
-                                    downBlocks.Add(blocks[j]);
+                                    this.checkBlocks.Add(blocks[j]);
                                 }
                             }
 
                             // 찾은 블럭들을 내려줍니다
-                            for (int j = 0; j < downBlocks.Count; j++)
+                            for (int j = 0; j < this.checkBlocks.Count; j++)
                             {
-                                var targetRow = downBlocks[j].row -= 1;
+                                var targetRow = this.checkBlocks[j].row -= 1;
 
-                                if (Mathf.Abs(targetRow - downBlocks[j].transform.position.y) > .1f)
+                                if (Mathf.Abs(targetRow - this.checkBlocks[j].transform.position.y) > .1f)
                                 {
-                                    Vector2 tempPosition = new Vector2(downBlocks[j].transform.position.x, targetRow);
-                                    downBlocks[j].transform.position = Vector2.Lerp(downBlocks[j].transform.position, tempPosition, .05f);
+                                    Vector2 tempPosition = new Vector2(this.checkBlocks[j].transform.position.x, targetRow);
+                                    this.checkBlocks[j].transform.position = Vector2.Lerp(this.checkBlocks[j].transform.position, tempPosition, .05f);
                                 }
                             }
                         }
@@ -286,7 +322,7 @@ namespace XR_3MatchGame_InGame
                         // 비어있는 칸에 새로운 블럭을 추가할 때 사용할 Col, Row 값을 담아놓습니다
                         // Row 값은 조건 연산자를 이용해서 설정합니다
                         var n_Col = f_Col;
-                        var n_Row = downBlocks.Count > 0 ? downBlocks[downBlocks.Count - 1].row + 1 : b_Row;
+                        var n_Row = this.checkBlocks.Count > 0 ? this.checkBlocks[this.checkBlocks.Count - 1].row + 1 : b_Row;
 
                         yield return new WaitForSeconds(.4f);
 
@@ -318,12 +354,12 @@ namespace XR_3MatchGame_InGame
                         }
 
                         LRTBCheck();
-                        downBlocks.Clear();
+                        this.checkBlocks.Clear();
                         i = 0;
                     }
                 }
 
-                // Top, Bottom 체크를 시작합니다
+                // Top, Bottom 체크
                 if (blocks[i].topBlock != null && blocks[i].bottomBlock != null)
                 {
                     // i번째에 존재하는 블럭의 Top, Bottom을 체크합니다
@@ -353,19 +389,19 @@ namespace XR_3MatchGame_InGame
                             {
                                 if (blocks[j].col == b_Col && blocks[j].row > b_Row)
                                 {
-                                    downBlocks.Add(blocks[j]);
+                                    this.checkBlocks.Add(blocks[j]);
                                 }
                             }
 
-                            for (int j = 0; j < downBlocks.Count; j++)
+                            for (int j = 0; j < this.checkBlocks.Count; j++)
                             {
                                 // 찾은 블럭들의 한칸씩 내려줍니다
-                                var targetRow = downBlocks[j].row -= 3;
+                                var targetRow = this.checkBlocks[j].row -= 3;
 
-                                if (Mathf.Abs(targetRow - downBlocks[j].transform.position.y) > .1f)
+                                if (Mathf.Abs(targetRow - this.checkBlocks[j].transform.position.y) > .1f)
                                 {
-                                    Vector2 tempPosition = new Vector2(downBlocks[j].transform.position.x, targetRow);
-                                    downBlocks[j].transform.position = Vector2.Lerp(downBlocks[j].transform.position, tempPosition, .05f);
+                                    Vector2 tempPosition = new Vector2(this.checkBlocks[j].transform.position.x, targetRow);
+                                    this.checkBlocks[j].transform.position = Vector2.Lerp(this.checkBlocks[j].transform.position, tempPosition, .05f);
                                 }
                             }
                         }
@@ -378,8 +414,7 @@ namespace XR_3MatchGame_InGame
                         // 비어있는 칸의 개수를 구합니다
                         var emptyBlockCount = size - (blocks.Count);
 
-                        /// 여기가 문제다
-                        var n_Row = downBlocks.Count > 0 ? downBlocks[downBlocks.Count - 1].row + 1 : b_Row - 2;
+                        var n_Row = this.checkBlocks.Count > 0 ? this.checkBlocks[this.checkBlocks.Count - 1].row + 1 : b_Row - 2;
 
                         yield return new WaitForSeconds(.4f);
 
@@ -399,13 +434,13 @@ namespace XR_3MatchGame_InGame
                         }
 
                         LRTBCheck();
-                        downBlocks.Clear();
+                        this.checkBlocks.Clear();
                         i = 0;
                     }
                 }
             }
 
-            // 블럭 체크를 종료합니다
+            // 체크 종료
             isChecking = false;
         }
     }
