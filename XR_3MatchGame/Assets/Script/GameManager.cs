@@ -201,6 +201,7 @@ namespace XR_3MatchGame_InGame
                 if (checkBlocks[checkBlocks.Count - 1].blockType == BlockType.Boom)
                 {
                     Debug.Log("ÆøÅº Á¸Àç");
+
                     // ÆøÅºÀº ¸¶Áö¸· ÀÎµ¦½º¿¡ Á¸Àç
                     curBlock = checkBlocks[checkBlocks.Count - 1];
 
@@ -247,6 +248,7 @@ namespace XR_3MatchGame_InGame
                 else
                 {
                     Debug.Log("ÆøÅº ¾øÀ½");
+
                     checkBlocks.Clear();
                 }
             }
