@@ -60,7 +60,7 @@ namespace XR_3MatchGame_Object
 
             var blockNum = Random.Range(1, gm.BoardSize.x);
 
-            // 랜덤으로 블럭의 스프라이트를 설정합니다
+            // 랜덤으로 블럭의 스프라이트를 설정
             switch (blockNum)
             {
                 case (int)BlockType.Blue:
@@ -106,19 +106,18 @@ namespace XR_3MatchGame_Object
             targetCol = col;
             targetRow = row;
 
-            // 블럭 스와이프를 체크 합니다
             BlockSwipe();
         }
 
         private void OnMouseDown()
         {
-            // 마우스 클릭을 시작 했을 때 위치를 저장한다
+            // 마우스 클릭 위치 저장
             firstTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         }
 
         private void OnMouseUp()
         {
-            // 마우스 클릭을 끝냈을 때 위치를 저장한다
+            // 마우스 클릭 끝난 위치 저장
             finalTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             CalculateAngle();
         }
@@ -128,9 +127,9 @@ namespace XR_3MatchGame_Object
         /// </summary>
         private void CalculateAngle()
         {
+            // 체크중 일땐 입력 막기
             if (gm.isChecking == true)
             {
-                // 체크중 블럭 이동을 제어합니다
                 return;
             }
 
@@ -174,6 +173,8 @@ namespace XR_3MatchGame_Object
         /// </summary>
         private void BlockMove()
         {
+            gm.isChecking = true;
+
             // Top
             if ((swipeAngle > 45 && swipeAngle <= 135) && row < gm.BoardSize.y)
             {
@@ -189,7 +190,7 @@ namespace XR_3MatchGame_Object
                         row += 1;
 
                         swipeDir = SwipeDir.Top;
-                        StartCoroutine(ReturnBlock());
+                        StartCoroutine(ReturnCheck());
                         return;
                     }
                 }
@@ -209,7 +210,7 @@ namespace XR_3MatchGame_Object
                         row -= 1;
 
                         swipeDir = SwipeDir.Bottom;
-                        StartCoroutine(ReturnBlock());
+                        StartCoroutine(ReturnCheck());
                         return;
                     }
                 }
@@ -229,7 +230,7 @@ namespace XR_3MatchGame_Object
                         col -= 1;
 
                         swipeDir = SwipeDir.Left;
-                        StartCoroutine(ReturnBlock());
+                        StartCoroutine(ReturnCheck());
                         return;
                     }
                 }
@@ -249,7 +250,7 @@ namespace XR_3MatchGame_Object
                         col += 1;
 
                         swipeDir = SwipeDir.Right;
-                        StartCoroutine(ReturnBlock());
+                        StartCoroutine(ReturnCheck());
                         return;
                     }
                 }
@@ -260,11 +261,8 @@ namespace XR_3MatchGame_Object
         /// 스와이프 한 블럭을 원 위치 할건지에 대해 조사하는 메서드
         /// </summary>
         /// <returns></returns>
-        private IEnumerator ReturnBlock()
+        private IEnumerator ReturnCheck()
         {
-            yield return new WaitForSeconds(.3f);
-
-            gm.isChecking = true;
             gm.LRTBCheck();
 
             var blocks = gm.blocks;
@@ -323,9 +321,10 @@ namespace XR_3MatchGame_Object
                     {
                         yield return new WaitForSeconds(.2f);
 
-                        // OtherBlock도 매칭되는 블럭이 있는지 확인
                         if (OtherBlockCheck(tb_Count, bb_Count, mb_Count, lb_Count, rb_Count, blocks))
                         {
+                            // OtherBlock에서도 매칭이 일어나는지 체크하고
+                            // 없다면 원 위치
                             otherBlock.row += 1;
                             row -= 1;
                         }
@@ -556,11 +555,9 @@ namespace XR_3MatchGame_Object
                     break;
             }
 
+            // false 부분 생각좀 해야할듯
+
             gm.LRTBCheck();
-
-            yield return new WaitForSeconds(.5f);
-
-            gm.isChecking = false;
         }
 
         /// <summary>
