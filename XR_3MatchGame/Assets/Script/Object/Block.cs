@@ -15,6 +15,15 @@ namespace XR_3MatchGame_Object
     {
         public bool CanRecycle { get; set; } = true;
 
+        public int BlockScore 
+        {
+            get
+            {
+                int blockScore = 5;
+                return blockScore;
+            }
+        }
+
         public SpriteRenderer spriteRenderer;
 
         public int col;     // 현재 블럭의 X 값
@@ -190,7 +199,8 @@ namespace XR_3MatchGame_Object
                         row += 1;
 
                         swipeDir = SwipeDir.Top;
-                        StartCoroutine(ReturnCheck());
+
+                        StartCoroutine(BlockCheck());
                         return;
                     }
                 }
@@ -210,7 +220,8 @@ namespace XR_3MatchGame_Object
                         row -= 1;
 
                         swipeDir = SwipeDir.Bottom;
-                        StartCoroutine(ReturnCheck());
+
+                        StartCoroutine(BlockCheck());
                         return;
                     }
                 }
@@ -230,7 +241,8 @@ namespace XR_3MatchGame_Object
                         col -= 1;
 
                         swipeDir = SwipeDir.Left;
-                        StartCoroutine(ReturnCheck());
+
+                        StartCoroutine(BlockCheck());
                         return;
                     }
                 }
@@ -250,7 +262,8 @@ namespace XR_3MatchGame_Object
                         col += 1;
 
                         swipeDir = SwipeDir.Right;
-                        StartCoroutine(ReturnCheck());
+
+                        StartCoroutine(BlockCheck());
                         return;
                     }
                 }
@@ -258,21 +271,21 @@ namespace XR_3MatchGame_Object
         }
 
         /// <summary>
-        /// 스와이프 한 블럭을 원 위치 할건지에 대해 조사하는 메서드
+        /// 스와이프된 블럭을 체킹하는 메서드
         /// </summary>
         /// <returns></returns>
-        private IEnumerator ReturnCheck()
+        private IEnumerator BlockCheck()
         {
             gm.LRTBCheck();
 
             var blocks = gm.blocks;
 
             // 같은 블럭 개수
-            var tb_Count = 0;
-            var bb_Count = 0;
-            var mb_Count = 0;
-            var lb_Count = 0;
-            var rb_Count = 0;
+            var count_T = 0;
+            var count_B = 0;
+            var count_M = 0;
+            var count_L = 0;
+            var count_R = 0;
 
             // 유저가 옮긴 블럭에 대한 로직
             switch (swipeDir)
@@ -285,7 +298,7 @@ namespace XR_3MatchGame_Object
                         {
                             if (blocks[i].blockType == blockType)
                             {
-                                tb_Count++;
+                                count_T++;
                             }
                         }
 
@@ -294,7 +307,7 @@ namespace XR_3MatchGame_Object
                         {
                             if (blocks[i].blockType == blockType)
                             {
-                                mb_Count++;
+                                count_M++;
                             }
                         }
 
@@ -303,7 +316,7 @@ namespace XR_3MatchGame_Object
                         {
                             if (blocks[i].blockType == blockType)
                             {
-                                lb_Count++;
+                                count_L++;
                             }
                         }
 
@@ -312,37 +325,42 @@ namespace XR_3MatchGame_Object
                         {
                             if (blocks[i].blockType == blockType)
                             {
-                                rb_Count++;
+                                count_R++;
                             }
                         }
                     }
 
-                    if (tb_Count < 2 && mb_Count < 2 && lb_Count < 2 && rb_Count < 2)
+                    // 이동한 위치에 매칭되는 블럭이 없다면
+                    if (count_T < 2 && count_M < 2 && count_L < 2 && count_R < 2)
                     {
                         yield return new WaitForSeconds(.2f);
 
-                        if (OtherBlockCheck(tb_Count, bb_Count, mb_Count, lb_Count, rb_Count, blocks))
+                        // OtherBlock의 매칭 여부 판단
+                        if (OtherBlockCheck(count_T, count_B, count_M, count_L, count_R, blocks))
                         {
-                            // OtherBlock에서도 매칭이 일어나는지 체크하고
-                            // 없다면 원 위치
+                            // 블럭 원위치
                             otherBlock.row += 1;
                             row -= 1;
+
+                            yield return new WaitForSeconds(.5f);
+
+                            gm.isChecking = false;
                         }
                         else
                         {
-                            // OtherBlock이 폭탄이 될 수 있는가 체크
+                            // OtherBlock 폭탄 여부 체크
                             BoomCheck(blocks, otherBlock);
 
-                            // OtherBlock에 매칭되는 블럭이 존재
+                            // 블럭 매칭 시작
                             gm.isStart = true;
                         }
                     }
                     else
                     {
-                        // 현재 블럭이 폭탄이 될 수 있는가 체크
+                        // 블럭 폭탄 여부 체크
                         BoomCheck(blocks, this);
 
-                        // 현재 블럭과 매칭되는 블럭이 존재
+                        // 블럭 매칭 시작
                         gm.isStart = true;
                     }
                     break;
@@ -355,7 +373,7 @@ namespace XR_3MatchGame_Object
                         {
                             if (blocks[i].blockType == blockType)
                             {
-                                bb_Count++;
+                                count_B++;
                             }
                         }
 
@@ -364,7 +382,7 @@ namespace XR_3MatchGame_Object
                         {
                             if (blocks[i].blockType == blockType)
                             {
-                                mb_Count++;
+                                count_M++;
                             }
                         }
 
@@ -373,7 +391,7 @@ namespace XR_3MatchGame_Object
                         {
                             if (blocks[i].blockType == blockType)
                             {
-                                lb_Count++;
+                                count_L++;
                             }
                         }
 
@@ -382,20 +400,24 @@ namespace XR_3MatchGame_Object
                         {
                             if (blocks[i].blockType == blockType)
                             {
-                                rb_Count++;
+                                count_R++;
                             }
                         }
                     }
 
-                    if (bb_Count < 2 && mb_Count < 2 && lb_Count < 2 && rb_Count < 2)
+                    if (count_B < 2 && count_M < 2 && count_L < 2 && count_R < 2)
                     {
                         yield return new WaitForSeconds(.2f);
 
-                        // OtherBlock도 매칭되는 블럭이 있는지 확인
-                        if (OtherBlockCheck(tb_Count, bb_Count, mb_Count, lb_Count, rb_Count, blocks))
+                        // OtherBlock 매칭 여부 판단
+                        if (OtherBlockCheck(count_T, count_B, count_M, count_L, count_R, blocks))
                         {
                             otherBlock.row -= 1;
                             row += 1;
+
+                            yield return new WaitForSeconds(.5f);
+
+                            gm.isChecking = false;
                         }
                         else
                         {
@@ -424,7 +446,7 @@ namespace XR_3MatchGame_Object
                         {
                             if (blocks[i].blockType == blockType)
                             {
-                                tb_Count++;
+                                count_T++;
                             }
                         }
 
@@ -433,7 +455,7 @@ namespace XR_3MatchGame_Object
                         {
                             if (blocks[i].blockType == blockType)
                             {
-                                bb_Count++;
+                                count_B++;
                             }
                         }
 
@@ -442,7 +464,7 @@ namespace XR_3MatchGame_Object
                         {
                             if (blocks[i].blockType == blockType)
                             {
-                                mb_Count++;
+                                count_M++;
                             }
                         }
 
@@ -451,20 +473,24 @@ namespace XR_3MatchGame_Object
                         {
                             if (blocks[i].blockType == blockType)
                             {
-                                lb_Count++;
+                                count_L++;
                             }
                         }
                     }
 
-                    if (tb_Count < 2 && bb_Count < 2 && mb_Count < 2 && lb_Count < 2)
+                    if (count_T < 2 && count_B < 2 && count_M < 2 && count_L < 2)
                     {
                         yield return new WaitForSeconds(.2f);
 
                         // OtherBlock도 매칭되는 블럭이 있는지 확인
-                        if (OtherBlockCheck(tb_Count, bb_Count, mb_Count, lb_Count, rb_Count, blocks))
+                        if (OtherBlockCheck(count_T, count_B, count_M, count_L, count_R, blocks))
                         {
                             otherBlock.col -= 1;
                             col += 1;
+
+                            yield return new WaitForSeconds(.5f);
+
+                            gm.isChecking = false;
                         }
                         else
                         {
@@ -493,7 +519,7 @@ namespace XR_3MatchGame_Object
                         {
                             if (blocks[i].blockType == blockType)
                             {
-                                tb_Count++;
+                                count_T++;
                             }
                         }
 
@@ -502,7 +528,7 @@ namespace XR_3MatchGame_Object
                         {
                             if (blocks[i].blockType == blockType)
                             {
-                                bb_Count++;
+                                count_B++;
                             }
                         }
 
@@ -511,7 +537,7 @@ namespace XR_3MatchGame_Object
                         {
                             if (blocks[i].blockType == blockType)
                             {
-                                mb_Count++;
+                                count_M++;
                             }
                         }
 
@@ -520,42 +546,44 @@ namespace XR_3MatchGame_Object
                         {
                             if (blocks[i].blockType == blockType)
                             {
-                                rb_Count++;
+                                count_R++;
                             }
                         }
                     }
 
-                    if (tb_Count < 2 && bb_Count < 2 && mb_Count < 2 && rb_Count < 2)
+                    if (count_T < 2 && count_B < 2 && count_M < 2 && count_R < 2)
                     {
                         yield return new WaitForSeconds(.2f);
 
-                        // OtherBlock도 매칭되는 블럭이 있는지 확인
-                        if (OtherBlockCheck(tb_Count, bb_Count, mb_Count, lb_Count, rb_Count, blocks))
+                        // OtherBlock 매칭 여부 판단
+                        if (OtherBlockCheck(count_T, count_B, count_M, count_L, count_R, blocks))
                         {
                             otherBlock.col += 1;
                             col -= 1;
+
+                            yield return new WaitForSeconds(.5f);
+
+                            gm.isChecking = false;
                         }
                         else
                         {
-                            // OtherBlock이 폭탄이 될 수 있는가 체크
+                            // OtherBlock 폭탄 여부 체크
                             BoomCheck(blocks, otherBlock);
 
-                            // OtherBlock에 매칭되는 블럭이 존재
+                            // OtherBlock 매칭 시작
                             gm.isStart = true;
                         }
                     }
                     else
                     {
-                        // 현재 블럭이 폭탄이 될 수 있는가 체크
+                        // 현재 블럭 폭탄 여부 체크
                         BoomCheck(blocks, this);
 
-                        // 현재 블럭과 매칭되는 블럭이 존재
+                        // 현재 블럭 매칭 시작
                         gm.isStart = true;
                     }
                     break;
             }
-
-            // false 부분 생각좀 해야할듯
 
             gm.LRTBCheck();
         }
@@ -563,22 +591,23 @@ namespace XR_3MatchGame_Object
         /// <summary>
         /// OtherBlock 매칭을 탐색해주는 메서드
         /// </summary>
-        /// <param name="t_Count">Top 개수</param>
-        /// <param name="b_Count">Bottom 개수</param>
-        /// <param name="m_Count">Middle 개수</param>
-        /// <param name="l_Count">Left 개수</param>
-        /// <param name="r_Count">Right 개수</param>
+        /// <param name="count_T">Top 개수</param>
+        /// <param name="count_B">Bottom 개수</param>
+        /// <param name="count_M">Middle 개수</param>
+        /// <param name="count_L">Left 개수</param>
+        /// <param name="count_R">Right 개수</param>
         /// <returns></returns>
-        private bool OtherBlockCheck(int t_Count, int b_Count, int m_Count, int l_Count, int r_Count, List<Block> blocks)
+        private bool OtherBlockCheck(int count_T, int count_B, int count_M, int count_L, int count_R, List<Block> blocks)
         {
-            t_Count = 0;
-            b_Count = 0;
-            m_Count = 0;
-            l_Count = 0;
-            r_Count = 0;
-            var mb_Count2 = 0;
+            // 재사용하기 위해 0으로 초기화
+            count_T = 0;
+            count_B = 0;
+            count_M = 0;
+            var count_M2 = 0;
+            count_L = 0;
+            count_R = 0;
 
-            // OtherBlock에서도 라인 체크가 일어 날 수 있으므로 체킹
+            // OtherBlock 매칭 블럭 탐색 작업
             for (int i = 0; i < blocks.Count; i++)
             {
                 // Top
@@ -586,7 +615,7 @@ namespace XR_3MatchGame_Object
                 {
                     if (otherBlock.blockType == blocks[i].blockType)
                     {
-                        t_Count++;
+                        count_T++;
                     }
                 }
 
@@ -595,16 +624,17 @@ namespace XR_3MatchGame_Object
                 {
                     if (otherBlock.blockType == blocks[i].blockType)
                     {
-                        m_Count++;
+                        count_M++;
                     }
                 }
 
                 // Vertical Middle
+                // Horizontal에서 매칭되는 블럭이 없으므로 재사용
                 if ((otherBlock.row + 1 == blocks[i].row || otherBlock.row - 1 == blocks[i].row) && otherBlock.col == blocks[i].col)
                 {
                     if (otherBlock.blockType == blocks[i].blockType)
                     {
-                        mb_Count2++;
+                        count_M2++;
                     }
                 }
 
@@ -613,7 +643,7 @@ namespace XR_3MatchGame_Object
                 {
                     if (otherBlock.blockType == blocks[i].blockType)
                     {
-                        b_Count++;
+                        count_B++;
                     }
                 }
 
@@ -622,7 +652,7 @@ namespace XR_3MatchGame_Object
                 {
                     if (otherBlock.blockType == blocks[i].blockType)
                     {
-                        l_Count++;
+                        count_L++;
                     }
                 }
 
@@ -631,31 +661,31 @@ namespace XR_3MatchGame_Object
                 {
                     if (otherBlock.blockType == blocks[i].blockType)
                     {
-                        r_Count++;
+                        count_R++;
                     }
                 }
             }
 
-            if (t_Count < 2 && m_Count < 2 && mb_Count2 < 2 && b_Count < 2 && l_Count < 2 && r_Count < 2)
+            if (count_T < 2 && count_M < 2 && count_M2 < 2 && count_B < 2 && count_L < 2 && count_R < 2)
             {
-                // OtherBlock에서 매칭 발생 안함
+                // 매칭 발생 안함
                 return true;
             }
             else
             {
-                // OtherBlock에서 매칭 발생
+                // 매칭 발생
                 return false;
             }
         }
 
         /// <summary>
-        /// 블럭의 폭탄 여부를 체크하는 메서드
+        /// 폭탄 여부를 체크하는 메서드
         /// </summary>
         /// <param name="blocks">블럭 모음</param>
         /// <param name="curBlock">여부를 체크할 블럭</param>
         private void BoomCheck(List<Block> blocks, Block curBlock)
         {
-            #region Col 체크
+            #region Col 체크 (3:0, 2:1, 1:2. 0:3)
 
             if (curBlock.blockType != BlockType.Boom)
             {
@@ -677,7 +707,7 @@ namespace XR_3MatchGame_Object
                         curBlock.blockType = BlockType.Boom;
                         curBlock.boomType = BoomType.ColBoom;
 
-                        // 마지막 자리에 폭탄을 저장
+                        // 마지막 자리에 폭탄 저장
                         gm.checkBlocks.Add(curBlock);
                         return;
                     }
@@ -705,7 +735,7 @@ namespace XR_3MatchGame_Object
                         curBlock.blockType = BlockType.Boom;
                         curBlock.boomType = BoomType.ColBoom;
 
-                        // 마지막 자리에 폭탄을 저장
+                        // 마지막 자리에 폭탄 저장
                         gm.checkBlocks.Add(curBlock);
                         return;
                     }
@@ -768,7 +798,7 @@ namespace XR_3MatchGame_Object
 
             #endregion
 
-            #region Row 체크
+            #region Row 체크 (3:0, 2:1, 1:2, 0:3)
 
             if (curBlock.blockType != BlockType.Boom)
             {
