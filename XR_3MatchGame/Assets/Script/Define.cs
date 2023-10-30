@@ -10,6 +10,11 @@ namespace XR_3MatchGame.Util
         None, Block
     }
 
+    public enum GameState
+    { 
+        None, Play, End
+    }
+
     public enum AtlasType
     {
         None, BlockAtlas

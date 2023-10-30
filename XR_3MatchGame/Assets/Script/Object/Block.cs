@@ -199,7 +199,6 @@ namespace XR_3MatchGame_Object
                         row += 1;
 
                         swipeDir = SwipeDir.Top;
-
                         StartCoroutine(BlockCheck());
                         return;
                     }
@@ -220,7 +219,6 @@ namespace XR_3MatchGame_Object
                         row -= 1;
 
                         swipeDir = SwipeDir.Bottom;
-
                         StartCoroutine(BlockCheck());
                         return;
                     }
@@ -241,7 +239,6 @@ namespace XR_3MatchGame_Object
                         col -= 1;
 
                         swipeDir = SwipeDir.Left;
-
                         StartCoroutine(BlockCheck());
                         return;
                     }
@@ -262,7 +259,6 @@ namespace XR_3MatchGame_Object
                         col += 1;
 
                         swipeDir = SwipeDir.Right;
-
                         StartCoroutine(BlockCheck());
                         return;
                     }
@@ -689,7 +685,7 @@ namespace XR_3MatchGame_Object
 
             if (curBlock.blockType != BlockType.Boom)
             {
-                gm.checkBlocks.Clear();
+                gm.delBlock.Clear();
 
                 for (int i = 0; i < blocks.Count; i++)
                 {
@@ -698,17 +694,17 @@ namespace XR_3MatchGame_Object
                     {
                         if (curBlock.blockType == blocks[i].blockType)
                         {
-                            gm.checkBlocks.Add(blocks[i]);
+                            gm.delBlock.Add(blocks[i]);
                         }
                     }
 
-                    if (gm.checkBlocks.Count == 3)
+                    if (gm.delBlock.Count == 3)
                     {
                         curBlock.blockType = BlockType.Boom;
                         curBlock.boomType = BoomType.ColBoom;
 
                         // ¸¶Áö¸· ÀÚ¸®¿¡ ÆøÅº ÀúÀå
-                        gm.checkBlocks.Add(curBlock);
+                        gm.delBlock.Add(curBlock);
                         return;
                     }
                 }
@@ -716,7 +712,7 @@ namespace XR_3MatchGame_Object
 
             if (curBlock.blockType != BlockType.Boom)
             {
-                gm.checkBlocks.Clear();
+                gm.delBlock.Clear();
 
                 for (int i = 0; i < blocks.Count; i++)
                 {
@@ -725,18 +721,17 @@ namespace XR_3MatchGame_Object
                     {
                         if (curBlock.blockType == blocks[i].blockType)
                         {
-                            gm.checkBlocks.Add(blocks[i]);
+                            gm.delBlock.Add(blocks[i]);
                         }
                     }
 
-                    if (gm.checkBlocks.Count == 3)
+                    if (gm.delBlock.Count == 3)
                     {
-
                         curBlock.blockType = BlockType.Boom;
                         curBlock.boomType = BoomType.ColBoom;
 
                         // ¸¶Áö¸· ÀÚ¸®¿¡ ÆøÅº ÀúÀå
-                        gm.checkBlocks.Add(curBlock);
+                        gm.delBlock.Add(curBlock);
                         return;
                     }
                 }
@@ -744,7 +739,7 @@ namespace XR_3MatchGame_Object
 
             if (curBlock.blockType != BlockType.Boom)
             {
-                gm.checkBlocks.Clear();
+                gm.delBlock.Clear();
 
                 for (int i = 0; i < blocks.Count; i++)
                 {
@@ -753,17 +748,17 @@ namespace XR_3MatchGame_Object
                     {
                         if (curBlock.blockType == blocks[i].blockType)
                         {
-                            gm.checkBlocks.Add(blocks[i]);
+                            gm.delBlock.Add(blocks[i]);
                         }
                     }
 
-                    if (gm.checkBlocks.Count == 3)
+                    if (gm.delBlock.Count == 3)
                     {
                         curBlock.blockType = BlockType.Boom;
                         curBlock.boomType = BoomType.ColBoom;
 
                         // ¸¶Áö¸· ÀÚ¸®¿¡ ÆøÅºÀ» ÀúÀå
-                        gm.checkBlocks.Add(curBlock);
+                        gm.delBlock.Add(curBlock);
                         return;
                     }
                 }
@@ -771,7 +766,7 @@ namespace XR_3MatchGame_Object
 
             if (curBlock.blockType != BlockType.Boom)
             {
-                gm.checkBlocks.Clear();
+                gm.delBlock.Clear();
 
                 for (int i = 0; i < blocks.Count; i++)
                 {
@@ -780,17 +775,17 @@ namespace XR_3MatchGame_Object
                     {
                         if (curBlock.blockType == blocks[i].blockType)
                         {
-                            gm.checkBlocks.Add(blocks[i]);
+                            gm.delBlock.Add(blocks[i]);
                         }
                     }
 
-                    if (gm.checkBlocks.Count == 3)
+                    if (gm.delBlock.Count == 3)
                     {
                         curBlock.blockType = BlockType.Boom;
                         curBlock.boomType = BoomType.ColBoom;
 
                         // ¸¶Áö¸· ÀÚ¸®¿¡ ÆøÅºÀ» ÀúÀå
-                        gm.checkBlocks.Add(curBlock);
+                        gm.delBlock.Add(curBlock);
                         return;
                     }
                 }
@@ -802,7 +797,7 @@ namespace XR_3MatchGame_Object
 
             if (curBlock.blockType != BlockType.Boom)
             {
-                gm.checkBlocks.Clear();
+                gm.delBlock.Clear();
 
                 for (int i = 0; i < blocks.Count; i++)
                 {
@@ -811,17 +806,17 @@ namespace XR_3MatchGame_Object
                     {
                         if (curBlock.blockType == blocks[i].blockType)
                         {
-                            gm.checkBlocks.Add(blocks[i]);
+                            gm.delBlock.Add(blocks[i]);
                         }
                     }
 
-                    if (gm.checkBlocks.Count == 3)
+                    if (gm.delBlock.Count == 3)
                     {
                         curBlock.blockType = BlockType.Boom;
                         curBlock.boomType = BoomType.RowBoom;
 
                         // ¸¶Áö¸· ÀÚ¸®¿¡ ÆøÅºÀ» ÀúÀå
-                        gm.checkBlocks.Add(curBlock);
+                        gm.delBlock.Add(curBlock);
                         return;
                     }
                 }
@@ -829,7 +824,7 @@ namespace XR_3MatchGame_Object
 
             if (curBlock.blockType != BlockType.Boom)
             {
-                gm.checkBlocks.Clear();
+                gm.delBlock.Clear();
 
                 for (int i = 0; i < blocks.Count; i++)
                 {
@@ -838,17 +833,17 @@ namespace XR_3MatchGame_Object
                     {
                         if (curBlock.blockType == blocks[i].blockType)
                         {
-                            gm.checkBlocks.Add(blocks[i]);
+                            gm.delBlock.Add(blocks[i]);
                         }
                     }
 
-                    if (gm.checkBlocks.Count == 3)
+                    if (gm.delBlock.Count == 3)
                     {
                         curBlock.blockType = BlockType.Boom;
                         curBlock.boomType = BoomType.RowBoom;
 
                         // ¸¶Áö¸· ÀÚ¸®¿¡ ÆøÅºÀ» ÀúÀå
-                        gm.checkBlocks.Add(curBlock);
+                        gm.delBlock.Add(curBlock);
                         return;
                     }
                 }
@@ -856,7 +851,7 @@ namespace XR_3MatchGame_Object
 
             if (curBlock.blockType != BlockType.Boom)
             {
-                gm.checkBlocks.Clear();
+                gm.delBlock.Clear();
 
                 for (int i = 0; i < blocks.Count; i++)
                 {
@@ -865,17 +860,17 @@ namespace XR_3MatchGame_Object
                     {
                         if (curBlock.blockType == blocks[i].blockType)
                         {
-                            gm.checkBlocks.Add(blocks[i]);
+                            gm.delBlock.Add(blocks[i]);
                         }
                     }
 
-                    if (gm.checkBlocks.Count == 3)
+                    if (gm.delBlock.Count == 3)
                     {
                         curBlock.blockType = BlockType.Boom;
                         curBlock.boomType = BoomType.RowBoom;
 
                         // ¸¶Áö¸· ÀÚ¸®¿¡ ÆøÅºÀ» ÀúÀå
-                        gm.checkBlocks.Add(curBlock);
+                        gm.delBlock.Add(curBlock);
                         return;
                     }
                 }
@@ -883,7 +878,7 @@ namespace XR_3MatchGame_Object
 
             if (curBlock.blockType != BlockType.Boom)
             {
-                gm.checkBlocks.Clear();
+                gm.delBlock.Clear();
 
                 for (int i = 0; i < blocks.Count; i++)
                 {
@@ -892,17 +887,17 @@ namespace XR_3MatchGame_Object
                     {
                         if (curBlock.blockType == blocks[i].blockType)
                         {
-                            gm.checkBlocks.Add(blocks[i]);
+                            gm.delBlock.Add(blocks[i]);
                         }
                     }
 
-                    if (gm.checkBlocks.Count == 3)
+                    if (gm.delBlock.Count == 3)
                     {
                         curBlock.blockType = BlockType.Boom;
                         curBlock.boomType = BoomType.RowBoom;
 
                         // ¸¶Áö¸· ÀÚ¸®¿¡ ÆøÅºÀ» ÀúÀå
-                        gm.checkBlocks.Add(curBlock);
+                        gm.delBlock.Add(curBlock);
                         return;
                     }
                 }
