@@ -86,11 +86,8 @@ namespace XR_3MatchGame_InGame
                     // 풀에서 사용 가능한 블럭을 가져옵니다
                     var block = blockPool.GetPoolableObject(obj => obj.CanRecycle);
                     block.transform.position = new Vector3(col, row, 0);
-
                     block.Initialize(col, row);
-
                     blocks.Add(block);
-
                     block.gameObject.SetActive(true);
                 }
             }
