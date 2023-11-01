@@ -23,7 +23,7 @@ namespace XR_3MatchGame_UI
         {
             if (!endUI.activeSelf)
             {
-                if (GameManager.Instance.gameState == GameState.End)
+                if (GameManager.Instance.GameState == GameState.End)
                 {
                     board.SetActive(false);
                     endUI.SetActive(true);

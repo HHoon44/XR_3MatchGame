@@ -15,7 +15,7 @@ namespace XR_3MatchGame_UI
         {
             gm = GameManager.Instance;
 
-            score.text = "Score : " + gm.score.ToString();
+            score.text = "Score : " + gm.Score.ToString();
         }
 
         private void Update()
@@ -28,7 +28,7 @@ namespace XR_3MatchGame_UI
 
         public void ScoreUpdate()
         {
-            score.text = "Score : " + gm.score.ToString();
+            score.text = "Score : " + gm.Score.ToString();
         }
     }
 }

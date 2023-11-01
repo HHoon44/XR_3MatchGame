@@ -1,8 +1,6 @@
-using JetBrains.Annotations;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq.Expressions;
-using Unity.VisualScripting;
 using UnityEngine;
 using XR_3MatchGame.Util;
 using XR_3MatchGame_InGame;
@@ -15,7 +13,7 @@ namespace XR_3MatchGame_Object
     {
         public bool CanRecycle { get; set; } = true;
 
-        public int BlockScore 
+        public int BlockScore
         {
             get
             {
@@ -44,17 +42,17 @@ namespace XR_3MatchGame_Object
         private Vector2 tempPosition;
 
         private Block otherBlock;               // 현재 블럭과 자리를 바꿀 블럭
-        private GameManager gm;
+        private GameManager GM;
 
         public BlockType blockType = BlockType.None;        // 현재 블럭의 타입
         public BoomType boomType = BoomType.None;           // 만약에 블럭이 폭탄이라면 어떤 폭탄인지에 대한 타입
         private SwipeDir swipeDir = SwipeDir.None;
 
-        // Test
-        public BlockType topType = BlockType.None;
-        public BlockType bottomType = BlockType.None;
-        public BlockType leftType = BlockType.None;
-        public BlockType rightType = BlockType.None;
+        [Header("Test")]
+        public BlockType Top_T = BlockType.None;
+        public BlockType Bottom_T = BlockType.None;
+        public BlockType Left_T = BlockType.None;
+        public BlockType Right_T = BlockType.None;
 
         /// <summary>
         /// 블럭 초기 세팅 메서드
@@ -65,9 +63,11 @@ namespace XR_3MatchGame_Object
         {
             spriteRenderer = GetComponent<SpriteRenderer>();
 
-            gm = GameManager.Instance;
+            GM = GameManager.Instance;
 
-            var blockNum = Random.Range(1, gm.BoardSize.x);
+            var blockNum = UnityEngine.Random.Range(1, 7);
+
+            // 
 
             // 랜덤으로 블럭의 스프라이트를 설정
             switch (blockNum)
@@ -137,7 +137,7 @@ namespace XR_3MatchGame_Object
         private void CalculateAngle()
         {
             // 체크중 일땐 입력 막기
-            if (gm.isChecking == true)
+            if (GM.isChecking == true)
             {
                 return;
             }
@@ -182,19 +182,19 @@ namespace XR_3MatchGame_Object
         /// </summary>
         private void BlockMove()
         {
-            gm.isChecking = true;
+            GM.isChecking = true;
 
             // Top
-            if ((swipeAngle > 45 && swipeAngle <= 135) && row < gm.BoardSize.y)
+            if ((swipeAngle > 45 && swipeAngle <= 135) && row < GM.BoardSize.y)
             {
-                for (int i = 0; i < gm.blocks.Count; i++)
+                for (int i = 0; i < GM.blocks.Count; i++)
                 {
-                    if (gm.blocks[i].col == col &&
-                        gm.blocks[i].row == row + 1)
+                    if (GM.blocks[i].col == col &&
+                        GM.blocks[i].row == row + 1)
                     {
                         // 위쪽 이동이므로 목표 블럭은 -1 이동
                         // 위쪽 이동이므로 이동 블럭은 +1 이동
-                        otherBlock = gm.blocks[i];
+                        otherBlock = GM.blocks[i];
                         otherBlock.row -= 1;
                         row += 1;
 
@@ -207,14 +207,14 @@ namespace XR_3MatchGame_Object
             // Bottom
             else if ((swipeAngle < -45 && swipeAngle >= -135) && row > 0)
             {
-                for (int i = 0; i < gm.blocks.Count; i++)
+                for (int i = 0; i < GM.blocks.Count; i++)
                 {
-                    if (gm.blocks[i].col == col &&
-                        gm.blocks[i].row == row - 1)
+                    if (GM.blocks[i].col == col &&
+                        GM.blocks[i].row == row - 1)
                     {
                         // 아래쪽 이동이므로 목표 블럭은 + 1 이동
                         // 아래쪽 이동이므로 이동 블럭은 - 1 이동
-                        otherBlock = gm.blocks[i];
+                        otherBlock = GM.blocks[i];
                         otherBlock.row += 1;
                         row -= 1;
 
@@ -227,14 +227,14 @@ namespace XR_3MatchGame_Object
             // Left
             else if ((swipeAngle > 135 || swipeAngle <= -135) && col > 0)
             {
-                for (int i = 0; i < gm.blocks.Count; i++)
+                for (int i = 0; i < GM.blocks.Count; i++)
                 {
-                    if (gm.blocks[i].col == col - 1 &&
-                        gm.blocks[i].row == row)
+                    if (GM.blocks[i].col == col - 1 &&
+                        GM.blocks[i].row == row)
                     {
                         // 왼쪽 이동이므로 목표 블럭은 + 1 이동
                         // 왼쪽 이동이므로 이동 블럭은 - 1 이동
-                        otherBlock = gm.blocks[i];
+                        otherBlock = GM.blocks[i];
                         otherBlock.col += 1;
                         col -= 1;
 
@@ -245,16 +245,16 @@ namespace XR_3MatchGame_Object
                 }
             }
             // Right
-            else if ((swipeAngle > -45 && swipeAngle <= 45) && col < gm.BoardSize.x)
+            else if ((swipeAngle > -45 && swipeAngle <= 45) && col < GM.BoardSize.x)
             {
-                for (int i = 0; i < gm.blocks.Count; i++)
+                for (int i = 0; i < GM.blocks.Count; i++)
                 {
-                    if (gm.blocks[i].col == col + 1 &&
-                        gm.blocks[i].row == row)
+                    if (GM.blocks[i].col == col + 1 &&
+                        GM.blocks[i].row == row)
                     {
                         // 오른쪽 이동이므로 목표 블럭은 - 1 이동
                         // 오른쪽 이동이므로 이동 블럭은 + 1 이동
-                        otherBlock = gm.blocks[i];
+                        otherBlock = GM.blocks[i];
                         otherBlock.col -= 1;
                         col += 1;
 
@@ -272,9 +272,9 @@ namespace XR_3MatchGame_Object
         /// <returns></returns>
         private IEnumerator BlockCheck()
         {
-            gm.LRTBCheck();
+            GM.TBLRCheck();
 
-            var blocks = gm.blocks;
+            var blocks = GM.blocks;
 
             // 같은 블럭 개수
             var count_T = 0;
@@ -340,7 +340,7 @@ namespace XR_3MatchGame_Object
 
                             yield return new WaitForSeconds(.5f);
 
-                            gm.isChecking = false;
+                            GM.isChecking = false;
                         }
                         else
                         {
@@ -348,7 +348,7 @@ namespace XR_3MatchGame_Object
                             BoomCheck(blocks, otherBlock);
 
                             // 블럭 매칭 시작
-                            gm.isStart = true;
+                            GM.isStart = true;
                         }
                     }
                     else
@@ -357,7 +357,7 @@ namespace XR_3MatchGame_Object
                         BoomCheck(blocks, this);
 
                         // 블럭 매칭 시작
-                        gm.isStart = true;
+                        GM.isStart = true;
                     }
                     break;
 
@@ -413,7 +413,7 @@ namespace XR_3MatchGame_Object
 
                             yield return new WaitForSeconds(.5f);
 
-                            gm.isChecking = false;
+                            GM.isChecking = false;
                         }
                         else
                         {
@@ -421,7 +421,7 @@ namespace XR_3MatchGame_Object
                             BoomCheck(blocks, otherBlock);
 
                             // OtherBlock에 매칭되는 블럭이 존재
-                            gm.isStart = true;
+                            GM.isStart = true;
                         }
                     }
                     else
@@ -430,7 +430,7 @@ namespace XR_3MatchGame_Object
                         BoomCheck(blocks, this);
 
                         // 현재 블럭과 매칭되는 블럭이 존재
-                        gm.isStart = true;
+                        GM.isStart = true;
                     }
                     break;
 
@@ -486,7 +486,7 @@ namespace XR_3MatchGame_Object
 
                             yield return new WaitForSeconds(.5f);
 
-                            gm.isChecking = false;
+                            GM.isChecking = false;
                         }
                         else
                         {
@@ -494,7 +494,7 @@ namespace XR_3MatchGame_Object
                             BoomCheck(blocks, otherBlock);
 
                             // OtherBlock에 매칭되는 블럭이 존재
-                            gm.isStart = true;
+                            GM.isStart = true;
                         }
                     }
                     else
@@ -503,7 +503,7 @@ namespace XR_3MatchGame_Object
                         BoomCheck(blocks, this);
 
                         // 현재 블럭과 매칭되는 블럭이 존재
-                        gm.isStart = true;
+                        GM.isStart = true;
                     }
                     break;
 
@@ -559,7 +559,7 @@ namespace XR_3MatchGame_Object
 
                             yield return new WaitForSeconds(.5f);
 
-                            gm.isChecking = false;
+                            GM.isChecking = false;
                         }
                         else
                         {
@@ -567,7 +567,7 @@ namespace XR_3MatchGame_Object
                             BoomCheck(blocks, otherBlock);
 
                             // OtherBlock 매칭 시작
-                            gm.isStart = true;
+                            GM.isStart = true;
                         }
                     }
                     else
@@ -576,12 +576,12 @@ namespace XR_3MatchGame_Object
                         BoomCheck(blocks, this);
 
                         // 현재 블럭 매칭 시작
-                        gm.isStart = true;
+                        GM.isStart = true;
                     }
                     break;
             }
 
-            gm.LRTBCheck();
+            GM.TBLRCheck();
         }
 
         /// <summary>
@@ -685,7 +685,7 @@ namespace XR_3MatchGame_Object
 
             if (curBlock.blockType != BlockType.Boom)
             {
-                gm.delBlock.Clear();
+                GM.delBlock.Clear();
 
                 for (int i = 0; i < blocks.Count; i++)
                 {
@@ -694,17 +694,17 @@ namespace XR_3MatchGame_Object
                     {
                         if (curBlock.blockType == blocks[i].blockType)
                         {
-                            gm.delBlock.Add(blocks[i]);
+                            GM.delBlock.Add(blocks[i]);
                         }
                     }
 
-                    if (gm.delBlock.Count == 3)
+                    if (GM.delBlock.Count == 3)
                     {
                         curBlock.blockType = BlockType.Boom;
                         curBlock.boomType = BoomType.ColBoom;
 
                         // 마지막 자리에 폭탄 저장
-                        gm.delBlock.Add(curBlock);
+                        GM.delBlock.Add(curBlock);
                         return;
                     }
                 }
@@ -712,7 +712,7 @@ namespace XR_3MatchGame_Object
 
             if (curBlock.blockType != BlockType.Boom)
             {
-                gm.delBlock.Clear();
+                GM.delBlock.Clear();
 
                 for (int i = 0; i < blocks.Count; i++)
                 {
@@ -721,17 +721,17 @@ namespace XR_3MatchGame_Object
                     {
                         if (curBlock.blockType == blocks[i].blockType)
                         {
-                            gm.delBlock.Add(blocks[i]);
+                            GM.delBlock.Add(blocks[i]);
                         }
                     }
 
-                    if (gm.delBlock.Count == 3)
+                    if (GM.delBlock.Count == 3)
                     {
                         curBlock.blockType = BlockType.Boom;
                         curBlock.boomType = BoomType.ColBoom;
 
                         // 마지막 자리에 폭탄 저장
-                        gm.delBlock.Add(curBlock);
+                        GM.delBlock.Add(curBlock);
                         return;
                     }
                 }
@@ -739,7 +739,7 @@ namespace XR_3MatchGame_Object
 
             if (curBlock.blockType != BlockType.Boom)
             {
-                gm.delBlock.Clear();
+                GM.delBlock.Clear();
 
                 for (int i = 0; i < blocks.Count; i++)
                 {
@@ -748,17 +748,17 @@ namespace XR_3MatchGame_Object
                     {
                         if (curBlock.blockType == blocks[i].blockType)
                         {
-                            gm.delBlock.Add(blocks[i]);
+                            GM.delBlock.Add(blocks[i]);
                         }
                     }
 
-                    if (gm.delBlock.Count == 3)
+                    if (GM.delBlock.Count == 3)
                     {
                         curBlock.blockType = BlockType.Boom;
                         curBlock.boomType = BoomType.ColBoom;
 
                         // 마지막 자리에 폭탄을 저장
-                        gm.delBlock.Add(curBlock);
+                        GM.delBlock.Add(curBlock);
                         return;
                     }
                 }
@@ -766,7 +766,7 @@ namespace XR_3MatchGame_Object
 
             if (curBlock.blockType != BlockType.Boom)
             {
-                gm.delBlock.Clear();
+                GM.delBlock.Clear();
 
                 for (int i = 0; i < blocks.Count; i++)
                 {
@@ -775,17 +775,17 @@ namespace XR_3MatchGame_Object
                     {
                         if (curBlock.blockType == blocks[i].blockType)
                         {
-                            gm.delBlock.Add(blocks[i]);
+                            GM.delBlock.Add(blocks[i]);
                         }
                     }
 
-                    if (gm.delBlock.Count == 3)
+                    if (GM.delBlock.Count == 3)
                     {
                         curBlock.blockType = BlockType.Boom;
                         curBlock.boomType = BoomType.ColBoom;
 
                         // 마지막 자리에 폭탄을 저장
-                        gm.delBlock.Add(curBlock);
+                        GM.delBlock.Add(curBlock);
                         return;
                     }
                 }
@@ -797,7 +797,7 @@ namespace XR_3MatchGame_Object
 
             if (curBlock.blockType != BlockType.Boom)
             {
-                gm.delBlock.Clear();
+                GM.delBlock.Clear();
 
                 for (int i = 0; i < blocks.Count; i++)
                 {
@@ -806,17 +806,17 @@ namespace XR_3MatchGame_Object
                     {
                         if (curBlock.blockType == blocks[i].blockType)
                         {
-                            gm.delBlock.Add(blocks[i]);
+                            GM.delBlock.Add(blocks[i]);
                         }
                     }
 
-                    if (gm.delBlock.Count == 3)
+                    if (GM.delBlock.Count == 3)
                     {
                         curBlock.blockType = BlockType.Boom;
                         curBlock.boomType = BoomType.RowBoom;
 
                         // 마지막 자리에 폭탄을 저장
-                        gm.delBlock.Add(curBlock);
+                        GM.delBlock.Add(curBlock);
                         return;
                     }
                 }
@@ -824,7 +824,7 @@ namespace XR_3MatchGame_Object
 
             if (curBlock.blockType != BlockType.Boom)
             {
-                gm.delBlock.Clear();
+                GM.delBlock.Clear();
 
                 for (int i = 0; i < blocks.Count; i++)
                 {
@@ -833,17 +833,17 @@ namespace XR_3MatchGame_Object
                     {
                         if (curBlock.blockType == blocks[i].blockType)
                         {
-                            gm.delBlock.Add(blocks[i]);
+                            GM.delBlock.Add(blocks[i]);
                         }
                     }
 
-                    if (gm.delBlock.Count == 3)
+                    if (GM.delBlock.Count == 3)
                     {
                         curBlock.blockType = BlockType.Boom;
                         curBlock.boomType = BoomType.RowBoom;
 
                         // 마지막 자리에 폭탄을 저장
-                        gm.delBlock.Add(curBlock);
+                        GM.delBlock.Add(curBlock);
                         return;
                     }
                 }
@@ -851,7 +851,7 @@ namespace XR_3MatchGame_Object
 
             if (curBlock.blockType != BlockType.Boom)
             {
-                gm.delBlock.Clear();
+                GM.delBlock.Clear();
 
                 for (int i = 0; i < blocks.Count; i++)
                 {
@@ -860,17 +860,17 @@ namespace XR_3MatchGame_Object
                     {
                         if (curBlock.blockType == blocks[i].blockType)
                         {
-                            gm.delBlock.Add(blocks[i]);
+                            GM.delBlock.Add(blocks[i]);
                         }
                     }
 
-                    if (gm.delBlock.Count == 3)
+                    if (GM.delBlock.Count == 3)
                     {
                         curBlock.blockType = BlockType.Boom;
                         curBlock.boomType = BoomType.RowBoom;
 
                         // 마지막 자리에 폭탄을 저장
-                        gm.delBlock.Add(curBlock);
+                        GM.delBlock.Add(curBlock);
                         return;
                     }
                 }
@@ -878,7 +878,7 @@ namespace XR_3MatchGame_Object
 
             if (curBlock.blockType != BlockType.Boom)
             {
-                gm.delBlock.Clear();
+                GM.delBlock.Clear();
 
                 for (int i = 0; i < blocks.Count; i++)
                 {
@@ -887,17 +887,17 @@ namespace XR_3MatchGame_Object
                     {
                         if (curBlock.blockType == blocks[i].blockType)
                         {
-                            gm.delBlock.Add(blocks[i]);
+                            GM.delBlock.Add(blocks[i]);
                         }
                     }
 
-                    if (gm.delBlock.Count == 3)
+                    if (GM.delBlock.Count == 3)
                     {
                         curBlock.blockType = BlockType.Boom;
                         curBlock.boomType = BoomType.RowBoom;
 
                         // 마지막 자리에 폭탄을 저장
-                        gm.delBlock.Add(curBlock);
+                        GM.delBlock.Add(curBlock);
                         return;
                     }
                 }
