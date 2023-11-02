@@ -1,4 +1,1 @@
-퍼즐 게임 흐름도
-
-1. GM -> StartSpawn
-2. Block -> Initialize : 랜덤 값 주는 부분 같은 블럭 많이 안나오도록 수정
+<3MatchGame>

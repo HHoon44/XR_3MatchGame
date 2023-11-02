@@ -43,6 +43,7 @@ namespace XR_3MatchGame_Object
 
         private Block otherBlock;               // 현재 블럭과 자리를 바꿀 블럭
         private GameManager GM;
+        private Board board;                    // 블럭이 존재하는 보드
 
         public BlockType blockType = BlockType.None;        // 현재 블럭의 타입
         public BoomType boomType = BoomType.None;           // 만약에 블럭이 폭탄이라면 어떤 폭탄인지에 대한 타입
@@ -64,10 +65,9 @@ namespace XR_3MatchGame_Object
             spriteRenderer = GetComponent<SpriteRenderer>();
 
             GM = GameManager.Instance;
+            board = GM.Board;
 
             var blockNum = UnityEngine.Random.Range(1, 7);
-
-            // 
 
             // 랜덤으로 블럭의 스프라이트를 설정
             switch (blockNum)
@@ -137,7 +137,7 @@ namespace XR_3MatchGame_Object
         private void CalculateAngle()
         {
             // 체크중 일땐 입력 막기
-            if (GM.isChecking == true)
+            if (GM.GameState == GameState.Checking)
             {
                 return;
             }
@@ -182,7 +182,7 @@ namespace XR_3MatchGame_Object
         /// </summary>
         private void BlockMove()
         {
-            GM.isChecking = true;
+            GM.GameStateUpdate(GameState.Checking);
 
             // Top
             if ((swipeAngle > 45 && swipeAngle <= 135) && row < GM.BoardSize.y)
@@ -267,12 +267,12 @@ namespace XR_3MatchGame_Object
         }
 
         /// <summary>
-        /// 스와이프된 블럭을 체킹하는 메서드
+        /// 블럭 매칭을 체크하는 메서드
         /// </summary>
         /// <returns></returns>
         private IEnumerator BlockCheck()
         {
-            GM.TBLRCheck();
+            board.BlockUpdate();
 
             var blocks = GM.blocks;
 
@@ -338,24 +338,18 @@ namespace XR_3MatchGame_Object
                             otherBlock.row += 1;
                             row -= 1;
 
-                            yield return new WaitForSeconds(.5f);
+                            yield return new WaitForSeconds(.4f);
 
-                            GM.isChecking = false;
+                            GM.GameStateUpdate(GameState.Play);
                         }
                         else
                         {
-                            // OtherBlock 폭탄 여부 체크
-                            BoomCheck(blocks, otherBlock);
-
                             // 블럭 매칭 시작
                             GM.isStart = true;
                         }
                     }
                     else
                     {
-                        // 블럭 폭탄 여부 체크
-                        BoomCheck(blocks, this);
-
                         // 블럭 매칭 시작
                         GM.isStart = true;
                     }
@@ -411,24 +405,18 @@ namespace XR_3MatchGame_Object
                             otherBlock.row -= 1;
                             row += 1;
 
-                            yield return new WaitForSeconds(.5f);
+                            yield return new WaitForSeconds(.4f);
 
-                            GM.isChecking = false;
+                            GM.GameStateUpdate(GameState.Play);
                         }
                         else
                         {
-                            // OtherBlock이 폭탄이 될 수 있는가 체크
-                            BoomCheck(blocks, otherBlock);
-
                             // OtherBlock에 매칭되는 블럭이 존재
                             GM.isStart = true;
                         }
                     }
                     else
                     {
-                        // 현재 블럭이 폭탄이 될 수 있는가 체크
-                        BoomCheck(blocks, this);
-
                         // 현재 블럭과 매칭되는 블럭이 존재
                         GM.isStart = true;
                     }
@@ -484,24 +472,18 @@ namespace XR_3MatchGame_Object
                             otherBlock.col -= 1;
                             col += 1;
 
-                            yield return new WaitForSeconds(.5f);
+                            yield return new WaitForSeconds(.4f);
 
-                            GM.isChecking = false;
+                            GM.GameStateUpdate(GameState.Play);
                         }
                         else
                         {
-                            // OtherBlock이 폭탄이 될 수 있는가 체크
-                            BoomCheck(blocks, otherBlock);
-
                             // OtherBlock에 매칭되는 블럭이 존재
                             GM.isStart = true;
                         }
                     }
                     else
                     {
-                        // 현재 블럭이 폭탄이 될 수 있는가 체크
-                        BoomCheck(blocks, this);
-
                         // 현재 블럭과 매칭되는 블럭이 존재
                         GM.isStart = true;
                     }
@@ -557,31 +539,25 @@ namespace XR_3MatchGame_Object
                             otherBlock.col += 1;
                             col -= 1;
 
-                            yield return new WaitForSeconds(.5f);
+                            yield return new WaitForSeconds(.4f);
 
-                            GM.isChecking = false;
+                            GM.GameStateUpdate(GameState.Play);
                         }
                         else
                         {
-                            // OtherBlock 폭탄 여부 체크
-                            BoomCheck(blocks, otherBlock);
-
                             // OtherBlock 매칭 시작
                             GM.isStart = true;
                         }
                     }
                     else
                     {
-                        // 현재 블럭 폭탄 여부 체크
-                        BoomCheck(blocks, this);
-
                         // 현재 블럭 매칭 시작
                         GM.isStart = true;
                     }
                     break;
             }
 
-            GM.TBLRCheck();
+            board.BlockUpdate();
         }
 
         /// <summary>
@@ -672,238 +648,6 @@ namespace XR_3MatchGame_Object
                 // 매칭 발생
                 return false;
             }
-        }
-
-        /// <summary>
-        /// 폭탄 여부를 체크하는 메서드
-        /// </summary>
-        /// <param name="blocks">블럭 모음</param>
-        /// <param name="curBlock">여부를 체크할 블럭</param>
-        private void BoomCheck(List<Block> blocks, Block curBlock)
-        {
-            #region Col 체크 (3:0, 2:1, 1:2. 0:3)
-
-            if (curBlock.blockType != BlockType.Boom)
-            {
-                GM.delBlock.Clear();
-
-                for (int i = 0; i < blocks.Count; i++)
-                {
-                    // -1 -2 -3 탐색
-                    if ((curBlock.col - 1 == blocks[i].col || curBlock.col - 2 == blocks[i].col || curBlock.col - 3 == blocks[i].col) && curBlock.row == blocks[i].row)
-                    {
-                        if (curBlock.blockType == blocks[i].blockType)
-                        {
-                            GM.delBlock.Add(blocks[i]);
-                        }
-                    }
-
-                    if (GM.delBlock.Count == 3)
-                    {
-                        curBlock.blockType = BlockType.Boom;
-                        curBlock.boomType = BoomType.ColBoom;
-
-                        // 마지막 자리에 폭탄 저장
-                        GM.delBlock.Add(curBlock);
-                        return;
-                    }
-                }
-            }
-
-            if (curBlock.blockType != BlockType.Boom)
-            {
-                GM.delBlock.Clear();
-
-                for (int i = 0; i < blocks.Count; i++)
-                {
-                    // -1 -2 +1 탐색
-                    if ((curBlock.col - 1 == blocks[i].col || curBlock.col - 2 == blocks[i].col || curBlock.col + 1 == blocks[i].col) && curBlock.row == blocks[i].row)
-                    {
-                        if (curBlock.blockType == blocks[i].blockType)
-                        {
-                            GM.delBlock.Add(blocks[i]);
-                        }
-                    }
-
-                    if (GM.delBlock.Count == 3)
-                    {
-                        curBlock.blockType = BlockType.Boom;
-                        curBlock.boomType = BoomType.ColBoom;
-
-                        // 마지막 자리에 폭탄 저장
-                        GM.delBlock.Add(curBlock);
-                        return;
-                    }
-                }
-            }
-
-            if (curBlock.blockType != BlockType.Boom)
-            {
-                GM.delBlock.Clear();
-
-                for (int i = 0; i < blocks.Count; i++)
-                {
-                    // -1 +1 +2
-                    if ((curBlock.col - 1 == blocks[i].col || curBlock.col + 1 == blocks[i].col || curBlock.col + 2 == blocks[i].col) && curBlock.row == blocks[i].row)
-                    {
-                        if (curBlock.blockType == blocks[i].blockType)
-                        {
-                            GM.delBlock.Add(blocks[i]);
-                        }
-                    }
-
-                    if (GM.delBlock.Count == 3)
-                    {
-                        curBlock.blockType = BlockType.Boom;
-                        curBlock.boomType = BoomType.ColBoom;
-
-                        // 마지막 자리에 폭탄을 저장
-                        GM.delBlock.Add(curBlock);
-                        return;
-                    }
-                }
-            }
-
-            if (curBlock.blockType != BlockType.Boom)
-            {
-                GM.delBlock.Clear();
-
-                for (int i = 0; i < blocks.Count; i++)
-                {
-                    // +1 +2 +3
-                    if ((curBlock.col + 1 == blocks[i].col || curBlock.col + 2 == blocks[i].col || curBlock.col + 3 == blocks[i].col) && curBlock.row == blocks[i].row)
-                    {
-                        if (curBlock.blockType == blocks[i].blockType)
-                        {
-                            GM.delBlock.Add(blocks[i]);
-                        }
-                    }
-
-                    if (GM.delBlock.Count == 3)
-                    {
-                        curBlock.blockType = BlockType.Boom;
-                        curBlock.boomType = BoomType.ColBoom;
-
-                        // 마지막 자리에 폭탄을 저장
-                        GM.delBlock.Add(curBlock);
-                        return;
-                    }
-                }
-            }
-
-            #endregion
-
-            #region Row 체크 (3:0, 2:1, 1:2, 0:3)
-
-            if (curBlock.blockType != BlockType.Boom)
-            {
-                GM.delBlock.Clear();
-
-                for (int i = 0; i < blocks.Count; i++)
-                {
-                    // -1 -2 -3
-                    if ((curBlock.row - 1 == blocks[i].row || curBlock.row - 2 == blocks[i].row || curBlock.row - 3 == blocks[i].row) && curBlock.col == blocks[i].col)
-                    {
-                        if (curBlock.blockType == blocks[i].blockType)
-                        {
-                            GM.delBlock.Add(blocks[i]);
-                        }
-                    }
-
-                    if (GM.delBlock.Count == 3)
-                    {
-                        curBlock.blockType = BlockType.Boom;
-                        curBlock.boomType = BoomType.RowBoom;
-
-                        // 마지막 자리에 폭탄을 저장
-                        GM.delBlock.Add(curBlock);
-                        return;
-                    }
-                }
-            }
-
-            if (curBlock.blockType != BlockType.Boom)
-            {
-                GM.delBlock.Clear();
-
-                for (int i = 0; i < blocks.Count; i++)
-                {
-                    // -1 -2 +1
-                    if ((curBlock.row - 1 == blocks[i].row || curBlock.row - 2 == blocks[i].row || curBlock.row + 1 == blocks[i].row) && curBlock.col == blocks[i].col)
-                    {
-                        if (curBlock.blockType == blocks[i].blockType)
-                        {
-                            GM.delBlock.Add(blocks[i]);
-                        }
-                    }
-
-                    if (GM.delBlock.Count == 3)
-                    {
-                        curBlock.blockType = BlockType.Boom;
-                        curBlock.boomType = BoomType.RowBoom;
-
-                        // 마지막 자리에 폭탄을 저장
-                        GM.delBlock.Add(curBlock);
-                        return;
-                    }
-                }
-            }
-
-            if (curBlock.blockType != BlockType.Boom)
-            {
-                GM.delBlock.Clear();
-
-                for (int i = 0; i < blocks.Count; i++)
-                {
-                    //-1 +1 +2
-                    if ((curBlock.row - 1 == blocks[i].row || curBlock.row + 1 == blocks[i].row || curBlock.row + 2 == blocks[i].row) && curBlock.col == blocks[i].col)
-                    {
-                        if (curBlock.blockType == blocks[i].blockType)
-                        {
-                            GM.delBlock.Add(blocks[i]);
-                        }
-                    }
-
-                    if (GM.delBlock.Count == 3)
-                    {
-                        curBlock.blockType = BlockType.Boom;
-                        curBlock.boomType = BoomType.RowBoom;
-
-                        // 마지막 자리에 폭탄을 저장
-                        GM.delBlock.Add(curBlock);
-                        return;
-                    }
-                }
-            }
-
-            if (curBlock.blockType != BlockType.Boom)
-            {
-                GM.delBlock.Clear();
-
-                for (int i = 0; i < blocks.Count; i++)
-                {
-                    // +1 +2 +3
-                    if ((curBlock.row + 1 == blocks[i].row || curBlock.row + 2 == blocks[i].row || curBlock.row + 3 == blocks[i].row) && curBlock.col == blocks[i].col)
-                    {
-                        if (curBlock.blockType == blocks[i].blockType)
-                        {
-                            GM.delBlock.Add(blocks[i]);
-                        }
-                    }
-
-                    if (GM.delBlock.Count == 3)
-                    {
-                        curBlock.blockType = BlockType.Boom;
-                        curBlock.boomType = BoomType.RowBoom;
-
-                        // 마지막 자리에 폭탄을 저장
-                        GM.delBlock.Add(curBlock);
-                        return;
-                    }
-                }
-            }
-
-            #endregion
         }
     }
 }

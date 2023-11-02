@@ -12,7 +12,7 @@ namespace XR_3MatchGame.Util
 
     public enum GameState
     { 
-        None, Play, End
+        None, Play, Checking, End
     }
 
     public enum AtlasType

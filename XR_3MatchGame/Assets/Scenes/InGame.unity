@@ -372,11 +372,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 185baeb27287dc046a2096fba05cdbda, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  GameState: 0
   blocks: []
-  downBlock: []
-  delBlock: []
+  downBlocks: []
+  delBlocks: []
   isStart: 0
-  isChecking: 0
 --- !u!1 &858118095
 GameObject:
   m_ObjectHideFlags: 0
@@ -751,7 +751,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: -2
-  m_Sprite: {fileID: 21300000, guid: 3bc211c4f4aac40c4a21856c66582d80, type: 3}
+  m_Sprite: {fileID: 21300000, guid: c911fb25b16025248ba17f6ef3767625, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

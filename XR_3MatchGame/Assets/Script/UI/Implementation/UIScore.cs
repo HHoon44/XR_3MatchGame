@@ -9,18 +9,18 @@ namespace XR_3MatchGame_UI
         [SerializeField]
         private TextMeshProUGUI score;
 
-        private GameManager gm;
+        private GameManager GM;
 
         private void Start()
         {
-            gm = GameManager.Instance;
+            GM = GameManager.Instance;
 
-            score.text = "Score : " + gm.Score.ToString();
+            score.text = "Score : " + GM.Score.ToString();
         }
 
         private void Update()
         {
-            if (gm.isChecking)
+            if (GM.GameState == XR_3MatchGame.Util.GameState.Play)
             {
                 ScoreUpdate();
             }
@@ -28,7 +28,7 @@ namespace XR_3MatchGame_UI
 
         public void ScoreUpdate()
         {
-            score.text = "Score : " + gm.Score.ToString();
+            score.text = "Score : " + GM.Score.ToString();
         }
     }
 }
