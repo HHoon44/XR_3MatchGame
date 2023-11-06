@@ -2,7 +2,7 @@ namespace XR_3MatchGame.Util
 {
     public enum SceneType
     {
-        None, Main, InGame
+        None, Main, InGame, Lobby, Select
     }
 
     public enum PoolType
@@ -11,7 +11,7 @@ namespace XR_3MatchGame.Util
     }
 
     public enum GameState
-    { 
+    {
         None, Play, Checking, End
     }
 
@@ -26,12 +26,12 @@ namespace XR_3MatchGame.Util
     }
 
     public enum SwipeDir
-    { 
+    {
         None, Top, Bottom, Left, Right
     }
 
     public enum BoomType
-    { 
+    {
         None, ColBoom, RowBoom
     }
 }
